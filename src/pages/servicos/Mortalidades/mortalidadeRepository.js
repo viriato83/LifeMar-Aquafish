@@ -5,7 +5,7 @@ export class repositorioMortalidade{
 
 
     constructor(){
-        this.endpoint =" https://api.mozsystems.com/aquafish/mortalidade"
+        this.endpoint =" https://api.mozsystems.com/tenant2/mortalidade"
         this.mensagem= new mensagem();
         this.token=sessionStorage.getItem("token");
        
@@ -64,7 +64,7 @@ export class repositorioMortalidade{
       } 
       async buscarmortalidade(){
         try {
-            const res = await fetch("http://localhost:8080/aquafish/mercadoria", {  // Adicione 'await' e utilize o this.endpoint
+            const res = await fetch("https://api.mozsystems.com/tenant2/mercadoria", {  // Adicione 'await' e utilize o this.endpoint
               method: 'GET',
               
               headers: {
@@ -93,7 +93,7 @@ export class repositorioMortalidade{
     
       async buscarmortalidadee(){
         try {
-            const res = await fetch("http://localhost:8080/aquafish/clientes", {  // Adicione 'await' e utilize o this.endpoint
+            const res = await fetch("https://api.mozsystems.com/tenant2/clientes", {  // Adicione 'await' e utilize o this.endpoint
               method: 'GET',
               
               headers: {

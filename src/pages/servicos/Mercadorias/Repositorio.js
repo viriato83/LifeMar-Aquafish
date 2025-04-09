@@ -4,7 +4,7 @@ export default class  repositorioMercadoria{
 
 
     constructor(){
-        this.endpoint =" https://api.mozsystems.com/aquafish/mercadoria"
+        this.endpoint =" https://api.mozsystems.com/tenant2/mercadoria"
         this.mensagem= new mensagem ();
         this.token=sessionStorage.getItem("token");
       
@@ -65,7 +65,7 @@ export default class  repositorioMercadoria{
       } 
       async buscarStock(){
         try {
-            const res = await fetch("https://api.mozsystems.com/aquafish/stock", {  // Adicione 'await' e utilize o this.endpoint
+            const res = await fetch("https://api.mozsystems.com/tenant2/stock", {  // Adicione 'await' e utilize o this.endpoint
               method: 'GET',
               
               headers: {

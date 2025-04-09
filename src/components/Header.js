@@ -20,7 +20,7 @@ export default function Header(){
         <div className="logo">
         <img src={logo} alt="Logo" width="130px" />
         </div>
-        <h1>Management System</h1>
+        <h1>LifeMar/Aquafish </h1>
         <button className="sair" onClick={(Sair)}>Sair</button>
     </header>
     </>)
