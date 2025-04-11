@@ -799,13 +799,17 @@ canvas {
   
   .content .tabela table {
     width: 100%;
-    max-width: 450px;
+    /* max-width: 450px; */
     margin: 20px 0;
+    margin-left: 300px;
+    
     
 
   }
   .content{
     font-size: 10px;
+    overflow-x: scroll;
+    width: 100%;
   }
 
  .mensagem{

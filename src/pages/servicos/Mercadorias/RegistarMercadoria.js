@@ -22,7 +22,7 @@ export default function RegistarMercadoria() {
     dataSaida: "",
     estoque: "",
   });
-
+  const quantidade=inputs.quantidade
   const [estoques, setEstoques] = useState([]); // Lista dinâmica de estoques
   const { id } = useParams();
   let msg= new mensagem();
@@ -32,7 +32,7 @@ export default function RegistarMercadoria() {
   useEffect(() => {
     // msg =;
 
-
+    
     // Buscar estoques do backend
     const fetchEstoques = async () => {
       const estoqueRepo = new repositorioStock();
@@ -79,6 +79,7 @@ export default function RegistarMercadoria() {
         msg.Erro("Preencha corretamente todos os campos obrigatórios");
       } else {
         repositorio.cadastrar(criaMercadoria());
+        localStorage.setItem("quantidade",JSON.stringify(quantidade))
         msg.sucesso("Mercadoria cadastrada com sucesso.");
         limparFormulario(); // Limpa o formulário após cadastrar
       }

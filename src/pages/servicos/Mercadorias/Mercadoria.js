@@ -8,9 +8,9 @@ export  default class Mercadoria{
         this.data_entrada=data_entrada;
         this.valor_un=valor_un;
         this.data_saida=data_saida;
-        this.usuario={
-            idusuarios:idusuarios
-        }
+        // this.usuario={
+        //     idusuarios:idusuarios
+        // }
         this.stock={
             idstock:stocks}
             ;
