@@ -46,7 +46,7 @@ export default function RegistarMercadoria() {
   }, []);
 
   const criaMercadoria = () => {
-    return new Mercadoria(inputs.nome,inputs.tipo,inputs.quantidade,inputs.dataEntrada,inputs.valorUnitario,inputs.dataSaida,usuario,inputs.estoque) 
+    return new Mercadoria(inputs.nome,inputs.tipo,inputs.quantidade,inputs.quantidade,inputs.dataEntrada,inputs.valorUnitario,inputs.dataSaida,usuario,inputs.estoque) 
       
   };
   const limparFormulario = () => {

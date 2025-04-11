@@ -111,7 +111,7 @@ const permissao= sessionStorage.getItem("cargo");
                     <td>{elemento.idmercadoria}</td>
                     <td>{elemento.nome}</td>
                     <td>{elemento.tipo}</td>
-                    <td>{JSON.parse(localStorage.getItem("quantidade"))}</td>
+                    <td>{elemento.quantidade_est}</td>
                     <td>{elemento.quantidade}</td>
                     <td>{elemento.data_entrada}</td>
                     <td>{elemento.valor_un} Mt</td>

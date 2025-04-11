@@ -77,7 +77,7 @@ header:hover {
 
 .sidebar {
   width: 240px;
-  background-color: #2b3a42;
+  background-color: #1c2022;
   padding: 20px;
   position: sticky;
   top: 0;
@@ -716,14 +716,30 @@ canvas {
   color: #22628d;
   background-color: #ffffff;
 }
+@media (max-width: 720px) {
+  .content .tabela table {
+    width: 100%;
+    /* max-width: 450px; */
+    margin: 20px 0;
+    margin-left: 200px;
+    
+    
 
+  }
+  .content{
+    font-size: 10px;
+    overflow-x: scroll;
+    width: 100%;
+  }
+
+}
 @media (max-width: 480px) {
   .loading-spinner-overlay {
     position: fixed;
     top: 0;
     left: 0;
   }
-  header {
+  header { 
  
     z-index: 2;
   }
