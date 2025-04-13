@@ -11,6 +11,7 @@ import RepositorioMercadoria from "./Repositorio";
 import Loading from "../../../components/loading";
 import * as XLSX from "xlsx";  // Import the xlsx library
 import { repositorioVenda } from "../vendas/vendasRepositorio";
+import repositorioStock from "../Stock.js/Repositorio";
 
 export default function MercadoriaView() {
   const repositorio = new RepositorioMercadoria();
@@ -24,7 +25,10 @@ const permissao= sessionStorage.getItem("cargo");
   const msg = useRef(null); // UseRef para manter uma instância estável
   const moda = useRef(null);
   const [quantidadeTotal, setQuantidadeTotal] = useState(0);
+  const [stockSelecionado,setLoteS] = useState(0)
   const [qSaidas, setQSaidas] = useState(0);
+  const [modelo2, setModelo2] = useState([]);
+  const repoStco= new repositorioStock();
   useEffect(() => {
     // Inicializa as instâncias uma vez
     msg.current = new Mensagem();
@@ -33,14 +37,28 @@ const permissao= sessionStorage.getItem("cargo");
     async function carregarDados() {
       setLoading(true); // Exibir loading
       try {
+        const repoStck = await repoStco.leitura();
         const dadosModelo = await repositorio.leitura();
         const dadosVendas= await repositoriovenda.leitura();
+       let valorTotalVendas=0;
+       let  quantidadeTotal=0;
+        dadosModelo.forEach((e) => {
+    
+                if (!stockSelecionado|| (stockSelecionado && stockSelecionado == e.stock.idstock)) {
+                 
+                  quantidadeTotal += e.quantidade;
+                  valorTotalVendas += e.valor_total;
+                  }
+          
+            
+
+        });
        
         const quantidadeTotalVendas = dadosModelo.reduce((acc, merc) => acc + merc.valor_total, 0);
         setModelo(dadosModelo);
-        setTotal(dadosModelo.reduce((acc, merc) => acc + merc.quantidade, 0));
-        setQuantidadeTotal(quantidadeTotalVendas);
-        
+        setTotal(quantidadeTotal);
+        setQuantidadeTotal(valorTotalVendas);
+        setModelo2(repoStck)
       } catch (erro) {
         console.error("Erro ao carregar dados:", erro);
       } finally {
@@ -48,7 +66,7 @@ const permissao= sessionStorage.getItem("cargo");
       }
     }
     carregarDados();
-  }, []);
+  }, [stockSelecionado]);
 
   // Função para exportar os dados para Excel
   const exportToExcel = () => {
@@ -89,6 +107,16 @@ const permissao= sessionStorage.getItem("cargo");
       <Conteinner>
         <Slider />
         <Content>
+          
+          <h2 >Mercadorias </h2>
+          <label>    Filtrar por Stock:</label>
+          <select value={stockSelecionado} onChange={(e) => setLoteS(Number(e.target.value))}>
+            {modelo2.map((stock) => (
+              <option key={stock.idstock} value={stock.idstock}>
+                Stock {stock.tipo}
+              </option>
+            ))}
+          </select>
           <div className="tabela">
             <table>
               <thead>
@@ -103,33 +131,42 @@ const permissao= sessionStorage.getItem("cargo");
                   <th>Valor total</th>
                   {/* <th>Q Saidas</th> */}
                   <th>Data de Saída</th>
+                  <th>Stock</th>
                 </tr>
               </thead>
               <tbody>
-                {modelo.map((elemento, i) => (
-                  <tr key={i}>
-                    <td>{elemento.idmercadoria}</td>
-                    <td>{elemento.nome}</td>
-                    <td>{elemento.tipo}</td>
-                    <td>{elemento.quantidade_est}</td>
-                    <td>{elemento.quantidade}</td>
-                    <td>{elemento.data_entrada}</td>
-                    <td>{elemento.valor_un} Mt</td>
-                    <td>
-                      {elemento.valor_total.toLocaleString("pt-PT", {
-                        minimumFractionDigits: 3,
-                      })}{" "}
-                      Mt
-                    </td>
-                    {/* <td>{elemento.q_saidas}</td> */}
-                    <td>{elemento.data_saida}</td>
-                  </tr>
-                ))}
+              {modelo.map((elemento, i) => {
+                    if (!stockSelecionado || elemento.stock.idstock == stockSelecionado) {
+                      return (
+                        <tr key={i}>
+                          <td>{elemento.idmercadoria}</td>
+                          <td>{elemento.nome}</td>
+                          <td>{elemento.tipo}</td>
+                          <td>{elemento.quantidade_est}</td>
+                          <td>{elemento.quantidade}</td>
+                          <td>{elemento.data_entrada}</td>
+                          <td>{elemento.valor_un} Mt</td>
+                          <td>
+                            {elemento.valor_total.toLocaleString("pt-PT", {
+                              minimumFractionDigits: 3,
+                            })}{" "}
+                            Mt
+                          </td>
+                          {/* <td>{elemento.q_saidas}</td> */}
+                          <td>{elemento.data_saida}</td>
+                          <td>{elemento.stock.idstock} : {elemento.stock.tipo}</td>
+                        </tr>
+                      );
+                    } else {
+                      return null; // Ignora se não corresponder ao filtro
+                    }
+                  })}
+
               </tbody>
               <tfoot>
                 <tr>
                   <td colSpan="4">Total</td>
-                  <td>{total} kg</td>
+                  <td>{total.toFixed(2)} kg</td>
                   <td>{quantidadeTotal.toLocaleString("pt-PT", { minimumFractionDigits: 3 })} Mt</td>
                 </tr>
               </tfoot>

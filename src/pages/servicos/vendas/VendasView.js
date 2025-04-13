@@ -136,7 +136,9 @@ export default function VendasView() {
       <Conteinner>
         <Slider />
         <Content>
-        <label>Filtrar por Stock:</label>
+        <h2 >Vendas</h2>
+        
+        <label>    Filtrar por Stock:</label>
           <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)}>
             {modelo2.map((stock) => (
               <option key={stock.idstock} value={stock.idstock}>
@@ -220,7 +222,7 @@ export default function VendasView() {
                     <tfoot>
                     <tr>
                       <td colSpan="4">Total Pago</td>
-                      <td  >{total}</td>
+                      <td  >{total.toFixed(2)}</td>
                       <td>{quantidadeTotal.toLocaleString("pt-PT", { minimumFractionDigits: 3 })} Mt</td>
                     </tr>
                     <tr>

@@ -66,6 +66,7 @@ export default function StockView() {
       <Conteinner>
         <Slider />
         <Content>
+        <h2 >Stock </h2>
           <div className="tabela">
             <table>
               <thead>
@@ -74,7 +75,7 @@ export default function StockView() {
                   <th>Quantidade</th>
                   <th>Tipo</th>
                   {/* <th>Mercadoria</th> */}
-                  <th>Total</th>
+                 
                 </tr>
               </thead>
               <tbody>
@@ -84,13 +85,13 @@ export default function StockView() {
                     <td>{elemento.quantidade} </td>
                     <td>{elemento.tipo}</td>
                    
-                    <td>{elemento.total}</td> {/* Assuming you have the total here */}
+                   
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="4">Total</td>
+                  <td colSpan="2">Total</td>
                   <td>{total}</td>
                 </tr>
               </tfoot>

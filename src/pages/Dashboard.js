@@ -163,7 +163,7 @@ export default function Dashboard() {
 console.log("Quantidade de entradas:", contador1);
 console.log("Valor de entrada no estado:", entrada);
   
-        setEntradada(contador1);
+        setEntradada(contador1.toFixed(2));
         setSaida(totalVendas);
       } catch (error) {
         console.error(error);
@@ -256,7 +256,6 @@ console.log("Valor de entrada no estado:", entrada);
         <Sidebar></Sidebar>
         <Content>
           {loading && <Loading></Loading>}
-          <div className="dashboard">
           <label>Filtrar por Stock:</label>
           <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)}>
             {modelo2.map((stock) => (
@@ -265,6 +264,7 @@ console.log("Valor de entrada no estado:", entrada);
               </option>
             ))}
           </select>
+          <div className="dashboard">
             <div className="card total-clients">
               <h3>Total Clientes</h3>
               <p id="totalClients">{cards[0]}</p>

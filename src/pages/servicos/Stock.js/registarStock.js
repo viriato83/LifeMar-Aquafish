@@ -79,7 +79,7 @@ export default function RegistarStock() {
                 type="number"
                 className="quantidade"
                 placeholder="Quantidade"
-                value={inputs.quantidade}
+                value={inputs.quantidade==null?null:inputs.quantidade}
                 onChange={(e) =>
                   setInputs({ ...inputs, quantidade: e.target.value })
                 }
@@ -94,7 +94,7 @@ export default function RegistarStock() {
                 onChange={(e) => setInputs({ ...inputs, tipo: e.target.value })}
               />
               <br />
-              <label>Mercadoria:
+              {/* <label>Mercadoria:
                 --Opcional
               </label>
               <select
@@ -113,7 +113,7 @@ export default function RegistarStock() {
                     {mercadoria.nome}
                   </option>
                 ))}
-              </select>
+              </select> */}
             </div>
             <button onClick={cadastrar} className="cadastrarStock">
               Cadastrar

@@ -156,7 +156,7 @@ export default class  repositorioMercadoria{
               "Authorization": "Bearer " + this.token,
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: Id ,tipo:"saida",quantidade: mercadoria}) 
+            body: JSON.stringify({ id: Id,quantidade: mercadoria}) 
            
           });
     

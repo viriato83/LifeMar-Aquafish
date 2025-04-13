@@ -59,6 +59,7 @@ export default function ClientesView() {
       <Conteinner>
         <Slider />
         <Content>
+        <h2 >Clientes </h2>
           <div className="tabela">
             <table>
               <thead>

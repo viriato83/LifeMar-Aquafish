@@ -63,36 +63,26 @@ export default function RegistarVenda() {
   //atualizacao 2025
 
   const criaMercadoria = (quantidade) => {
-    let Total = 0; // Inicializa o total
+    let Total = 0;
   
     mercadorias.map((merc) => {
-    
       if (merc.idmercadoria == inputs.mercadoria) {
-            Total = merc.quantidade - Number(quantidade);
-        // Valida se a quantidade restante é válida
-        if (Total <= 0) {
-          // window.alert("Quantidade insuficiente em estoque.");
-          // Total = 0; // Garante que não seja negativo
-            Cadastro=false
-      
-        }if(Total>=0){
-          Cadastro=true
+        Total = Number(merc.quantidade) - Number(quantidade);
+  
+        if (Total < 0) {
+          Cadastro = false;
+        } else {
+          Cadastro = true;
         }
+  
+        // Corrigir precisão
+        Total = parseFloat(Total.toFixed(2));
       }
     });
   
-    // Retorna uma nova instância da mercadoria com o valor correto
-    return new mercadoria(
-      "", 
-      "",
-      Total, 
-      "",
-      null, // A
-      "",
-      0,
-      0
-    );
+    return Total;
   };
+  
   
   
   const criaVenda = () => {
@@ -131,8 +121,9 @@ export default function RegistarVenda() {
           novaV=vendaT.quantidade-inputs.quantidade
         
         }
+     
                const novaMercadoria = criaMercadoria(novaV);
-               await mercadoriaRepo.editar(inputs.mercadoria, novaMercadoria);
+               await mercadoriaRepo.editar3(inputs.mercadoria, novaMercadoria);
        }
       msg.sucesso("Venda editada com sucesso.");
       limparFormulario();
@@ -162,7 +153,8 @@ export default function RegistarVenda() {
             await repositorio.cadastrar(criaVenda());
       
             // Atualizar mercadoria com estoque atualizado
-            await mercadoriaRepo.editar(inputs.mercadoria, novaMercadoria);
+            console.log(novaMercadoria)
+            await mercadoriaRepo.editar3(inputs.mercadoria, novaMercadoria);
             if(inputs.status_p){
               await clienteRepo.editar2(inputs.cliente,inputs.status_p)
             }
@@ -207,7 +199,7 @@ export default function RegistarVenda() {
                 type="number"
                 className="quantidade"
                 placeholder="Quantidade em kg"
-                value={inputs.quantidade}
+                value={inputs.quantidade==null?null:inputs.quantidade}
                 onChange={(e) =>
                   setInputs({ ...inputs, quantidade: e.target.value })
                 }

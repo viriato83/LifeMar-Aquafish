@@ -186,6 +186,7 @@ main {
 .content {
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;
   width: 100%;
   justify-content: center;
   align-items: center;
@@ -194,6 +195,7 @@ main {
   padding: 30px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 
 footer {
   background-color: #131a1d;
@@ -413,14 +415,17 @@ select {
 
 /* Dashboard */
 .dashboard {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+ 
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
-  padding: 20px;
+  padding: 20px; 
 }
 
   .card {
       background-color: #3498db;
+      min-width: 200px;
       color: white;
       border-radius: 8px;
       padding: 10px;
@@ -690,6 +695,7 @@ canvas {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
 
 @keyframes spin {
   0% {
