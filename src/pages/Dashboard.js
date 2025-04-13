@@ -271,21 +271,21 @@ console.log("Valor de entrada no estado:", entrada);
             </div>
             <div className="card total-sales">
               <h3>Total Vendas</h3>
-              <p id="totalSales">{Number(cards[3])+Number(cards[2])} kg</p>
+              <p id="totalSales">{(Number(cards[3])+Number(cards[2])).toFixed(2)} kg</p>
             </div>
             <div className="card total-sales">
               <h3> Vendas Pagas</h3>
-              <p id="totalSales">{total} kg</p>
+              <p id="totalSales">{total.toFixed(2)} kg</p>
             </div>
             <div className="card total-sales">
               <h3> Vendas Em Divida</h3>
-              <p id="totalSales">{totalDivida} kg</p>
+              <p id="totalSales">{totalDivida.toFixed(2)} kg</p>
             </div>
             {(buscarCargo() === "admin"|| buscarCargo()==="funcionario") && (
               <>
                 <div className="card total-goods">
                   <h3>Total Mercadorias Disponiveis</h3>
-                  <p id="totalGoods">{cards[1]} kg</p>
+                  <p id="totalGoods">{cards[1].toFixed(2)} kg</p>
                 </div>
                 <div className="card total-stock">
                   <h3>Total Entradas</h3>

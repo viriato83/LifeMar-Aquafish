@@ -227,7 +227,7 @@ export default function VendasView() {
                     </tr>
                     <tr>
                       <td colSpan="4">Em dívida</td>
-                      <td>{totalDivida}</td>
+                      <td>{totalDivida.toFixed(2)}</td>
                       <td>{quantiDivida.toLocaleString("pt-PT", { minimumFractionDigits: 3 })} Mt</td>
                     </tr>
 
