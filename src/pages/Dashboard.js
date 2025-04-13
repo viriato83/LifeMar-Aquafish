@@ -141,7 +141,7 @@ export default function Dashboard() {
         setModelo2(stk)
         let cards2 = [
           await clientes.total(),
-          totalMerc,
+          totalMerc.toFixed(2),
           total ,
           totalDivida
         ];
@@ -285,7 +285,7 @@ console.log("Valor de entrada no estado:", entrada);
               <>
                 <div className="card total-goods">
                   <h3>Total Mercadorias Disponiveis</h3>
-                  <p id="totalGoods">{cards[1].toFixed(2)} kg</p>
+                  <p id="totalGoods">{cards[1]} kg</p>
                 </div>
                 <div className="card total-stock">
                   <h3>Total Entradas</h3>
