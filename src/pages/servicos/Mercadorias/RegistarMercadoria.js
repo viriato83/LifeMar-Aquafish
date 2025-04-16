@@ -46,7 +46,7 @@ export default function RegistarMercadoria() {
   }, []);
 
   const criaMercadoria = () => {
-    return new Mercadoria(inputs.nome,inputs.tipo,inputs.quantidade,inputs.quantidade,inputs.dataEntrada,inputs.valorUnitario,inputs.dataSaida,usuario,inputs.estoque) 
+    return new Mercadoria(inputs.nome,"Entrada",inputs.quantidade,inputs.quantidade,inputs.dataEntrada,inputs.valorUnitario,inputs.dataSaida,usuario,inputs.estoque) 
       
   };
   const limparFormulario = () => {
@@ -67,10 +67,13 @@ export default function RegistarMercadoria() {
       repositorio.editar(id, criaMercadoria());
       msg.sucesso("Mercadoria editada com sucesso.");
       limparFormulario(); // Limpa o formulário após editar
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } else {
       if (
         !inputs.nome ||
-        !inputs.tipo ||
+      
         !inputs.quantidade ||
         !inputs.dataEntrada ||
         !inputs.valorUnitario ||
@@ -82,6 +85,9 @@ export default function RegistarMercadoria() {
         localStorage.setItem("quantidade",JSON.stringify(quantidade))
         msg.sucesso("Mercadoria cadastrada com sucesso.");
         limparFormulario(); // Limpa o formulário após cadastrar
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     }
   };
@@ -111,7 +117,7 @@ export default function RegistarMercadoria() {
                 onChange={(e) => setInputs({ ...inputs, nome: e.target.value })}
               />
               <br />
-              <label>Tipo:</label>
+              {/* <label>Tipo:</label>
               <input
                 type="text"
                 className="tipo"
@@ -119,7 +125,7 @@ export default function RegistarMercadoria() {
                 value={inputs.tipo}
                 onChange={(e) => setInputs({ ...inputs, tipo: e.target.value })}
               />
-              <br />
+              <br /> */}
               <label>Quantidade: kg</label>
               <input
                 type="number"
@@ -151,7 +157,7 @@ export default function RegistarMercadoria() {
                   setInputs({ ...inputs, valorUnitario: e.target.value })
                 }
               />
-              <br />
+              {/* <br />
               <label>Data de Saída: --Opcional</label>
               <input
                 type="date"
@@ -160,7 +166,7 @@ export default function RegistarMercadoria() {
                 onChange={(e) =>
                   setInputs({ ...inputs, dataSaida: e.target.value })
                 }
-              />
+              /> */}
               <br />
               <label>Estoque:</label>
               <select
