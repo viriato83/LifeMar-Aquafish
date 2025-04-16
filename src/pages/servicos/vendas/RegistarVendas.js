@@ -257,7 +257,7 @@ export default function RegistarVenda() {
            
               <br />
               <label>Mercadoria:</label>
-              <select
+                            <select
                 className="mercadoria"
                 value={inputs.mercadoria}
                 onChange={(e) =>
@@ -265,15 +265,28 @@ export default function RegistarVenda() {
                 }
               >
                 <option value="">Selecione uma mercadoria</option>
-                {mercadorias.map((mercadoria) => (
-                  <option
-                    key={mercadoria.idmercadoria}
-                    value={mercadoria.idmercadoria}
-                  >
-                    {mercadoria.nome}
-                  </option>
+
+                {Object.entries(
+                  mercadorias.reduce((grupos, merc) => {
+                    const stockLabel = `Stock ${merc.stock?.idstock} - ${merc.stock?.tipo}`;
+                    if (!grupos[stockLabel]) grupos[stockLabel] = [];
+                    grupos[stockLabel].push(merc);
+                    return grupos;
+                  }, {})
+                ).map(([stockLabel, mercadoriasDoGrupo]) => (
+                  <optgroup key={stockLabel} label={stockLabel}>
+                    {mercadoriasDoGrupo.map((mercadoria) => (
+                      <option
+                        key={mercadoria.idmercadoria}
+                        value={mercadoria.idmercadoria}
+                      >
+                        {mercadoria.nome}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
+
               <br />
             </div>
             <button onClick={cadastrar} className="cadastrarVenda">

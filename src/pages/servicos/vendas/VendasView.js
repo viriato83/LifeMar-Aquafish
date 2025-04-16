@@ -138,7 +138,7 @@ export default function VendasView() {
         <Content>
         <h2 >Vendas</h2>
         
-        <label>    Filtrar por Stock:</label>
+        <label>  Filtrar por Stock:</label>
           <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)}>
             {modelo2.map((stock) => (
               <option key={stock.idstock} value={stock.idstock}>
