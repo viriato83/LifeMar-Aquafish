@@ -164,7 +164,7 @@ console.log("Quantidade de entradas:", contador1);
 console.log("Valor de entrada no estado:", entrada);
   
         setEntradada(contador1.toFixed(2));
-        setSaida(totalVendas);
+        setSaida(totalVendas.toFixed(2));
       } catch (error) {
         console.error(error);
       } finally {
