@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import logo from "../logo_white-removebg2.png"
+import logo from "../logo_lifemar.png"
 export default function Header(){
     function Sair(){
         sessionStorage.clear()

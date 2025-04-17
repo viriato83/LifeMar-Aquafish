@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logo from "../logo_white-removebg2.png"
+import logo from "../logo_lifemar.png"
 export default function Login({ children }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
