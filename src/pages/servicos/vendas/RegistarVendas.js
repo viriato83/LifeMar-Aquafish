@@ -129,56 +129,55 @@ export default function RegistarVenda() {
       msg.sucesso("Venda editada com sucesso.");
       limparFormulario();
     } else {
-      // if (
-      //   !inputs.quantidade ||
-      //   !inputs.valorUnitario ||
-      //   !inputs.data ||
-      //   !inputs.cliente ||
-      //   !inputs.mercadoria
-      // ) {
-      //   msg.Erro("Preencha corretamente todos os campos obrigatórios");
-      //   return;
-      // }
+      if (
+        !inputs.quantidade ||
+        !inputs.valorUnitario ||
+        !inputs.data ||
+        !inputs.cliente ||
+        !inputs.mercadoria
+      ) {
+        msg.Erro("Preencha corretamente todos os campos obrigatórios");
+        return;
+      }
   
-      // // Verificar estoque antes do cadastro
-      // const novaMercadoria = criaMercadoria(inputs.quantidade);
+      // Verificar estoque antes do cadastro
+      const novaMercadoria = criaMercadoria(inputs.quantidade);
   
-      // if (!Cadastro) {
-      //   msg.Erro("Estoque insuficiente.");
-      //   return;
-      // }
+      if (!Cadastro) {
+        msg.Erro("Estoque insuficiente.");
+        return;
+      }
   
-      // try {
-      //   // Cadastrar venda
-      //   if(inputs.cliente!=status){
-      //       await repositorio.cadastrar(criaVenda());
+      try {
+        // Cadastrar venda
+        if(inputs.cliente!=status){
+            await repositorio.cadastrar(criaVenda());
       
-      //       // Atualizar mercadoria com estoque atualizado
-      //       console.log(novaMercadoria)
-      //       await mercadoriaRepo.editar3(inputs.mercadoria, novaMercadoria);
-      //       if(inputs.status_p){
-      //         await clienteRepo.editar2(inputs.cliente,inputs.status_p)
-      //       }
+            // Atualizar mercadoria com estoque atualizado
+            console.log(novaMercadoria)
+            await mercadoriaRepo.editar3(inputs.mercadoria, novaMercadoria);
+            if(inputs.status_p){
+              await clienteRepo.editar2(inputs.cliente,inputs.status_p)
+            }
             
-      //       // Atualizar saídas
-      //       mercadorias.forEach((merc) => {
-      //         if (merc.idmercadoria == inputs.mercadoria) {
-      //           saidas = merc.q_saidas + Number(inputs.quantidade);
-      //         }
-      //       });
+            // Atualizar saídas
+            mercadorias.forEach((merc) => {
+              if (merc.idmercadoria == inputs.mercadoria) {
+                saidas = merc.q_saidas + Number(inputs.quantidade);
+              }
+            });
             
-      //       await mercadoriaRepo.editar2(inputs.mercadoria, inputs.data, saidas);
+            await mercadoriaRepo.editar2(inputs.mercadoria, inputs.data, saidas);
             
-      //       msg.sucesso("Venda cadastrada com sucesso.");
-      //       limparFormulario();
-      //     }else{
-      //       msg.Erro("O cliente Contem Divida")
-      //     }
-      //   limparFormulario()
-      // } catch (error) {
-      //   msg.Erro(`Erro ao cadastrar venda.`);
-      // }
-      console.log(criaVenda())
+            msg.sucesso("Venda cadastrada com sucesso.");
+            limparFormulario();
+          }else{
+            msg.Erro("O cliente Contem Divida")
+          }
+        limparFormulario()
+      } catch (error) {
+        msg.Erro(`Erro ao cadastrar venda.`);
+      }
     }
   };
   
