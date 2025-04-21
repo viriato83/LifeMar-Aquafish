@@ -283,7 +283,7 @@ export default function RegistarVenda() {
                          key={mercadoria.idmercadoria}
                           value={mercadoria.idmercadoria}
                                             >
-                          {mercadoria.nome}
+                          {mercadoria.nome} :: {mercadoria.quantidade} Kg
                           </option>
                   ))}
 
