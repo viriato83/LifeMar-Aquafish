@@ -437,6 +437,7 @@ select {
   
   .card:hover {
       transform: scale(1.05);
+      background-color: #1371b457;
   }
   
   .card h3 {

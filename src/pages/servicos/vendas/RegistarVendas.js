@@ -276,14 +276,17 @@ export default function RegistarVenda() {
                   }, {})
                 ).map(([stockLabel, mercadoriasDoGrupo]) => (
                   <optgroup key={stockLabel} label={stockLabel}>
-                    {mercadoriasDoGrupo.map((mercadoria) => (
-                      <option
-                        key={mercadoria.idmercadoria}
-                        value={mercadoria.idmercadoria}
-                      >
-                        {mercadoria.nome}
-                      </option>
-                    ))}
+                 {mercadoriasDoGrupo
+                     .filter(mercadoria => mercadoria.quantidade !== 0)
+                      .map(mercadoria => (
+                       <option
+                         key={mercadoria.idmercadoria}
+                          value={mercadoria.idmercadoria}
+                                            >
+                          {mercadoria.nome}
+                          </option>
+                  ))}
+
                   </optgroup>
                 ))}
               </select>

@@ -25,6 +25,7 @@ const permissao= sessionStorage.getItem("cargo");
   const msg = useRef(null); // UseRef para manter uma instância estável
   const moda = useRef(null);
   const [quantidadeTotal, setQuantidadeTotal] = useState(0);
+  const [quantidadeEst, setQuantidadeEst] = useState(0);
   const [stockSelecionado,setLoteS] = useState(0)
   const [qSaidas, setQSaidas] = useState(0);
   const [modelo2, setModelo2] = useState([]);
@@ -42,10 +43,11 @@ const permissao= sessionStorage.getItem("cargo");
         const dadosVendas= await repositoriovenda.leitura();
        let valorTotalVendas=0;
        let  quantidadeTotal=0;
+       let quantidadeEst=0;
         dadosModelo.forEach((e) => {
     
                 if (!stockSelecionado|| (stockSelecionado && stockSelecionado == e.stock.idstock)) {
-                 
+                  quantidadeEst+=e.quantidade_est;
                   quantidadeTotal += e.quantidade;
                   valorTotalVendas += e.valor_total;
                   }
@@ -55,6 +57,7 @@ const permissao= sessionStorage.getItem("cargo");
         });
        
         const quantidadeTotalVendas = dadosModelo.reduce((acc, merc) => acc + merc.valor_total, 0);
+        setQuantidadeEst(quantidadeEst)
         setModelo(dadosModelo);
         setTotal(quantidadeTotal);
         setQuantidadeTotal(valorTotalVendas);
@@ -111,6 +114,7 @@ const permissao= sessionStorage.getItem("cargo");
           <h2 >Mercadorias </h2>
           <label>    Filtrar por Stock:</label>
           <select value={stockSelecionado} onChange={(e) => setLoteS(Number(e.target.value))}>
+            <option>Selecione Um Stock</option>
             {modelo2.map((stock) => (
               <option key={stock.idstock} value={stock.idstock}>
                 Stock {stock.tipo}
@@ -166,7 +170,9 @@ const permissao= sessionStorage.getItem("cargo");
               <tfoot>
                 <tr>
                   <td colSpan="4">Total</td>
-                  <td>{total.toFixed(2)} kg</td>
+                  <td>{quantidadeEst.toFixed(2)} kg </td>
+
+                  <td>{total.toFixed(2)} kg   Disponiveis</td>
                   <td>{quantidadeTotal.toLocaleString("pt-PT", { minimumFractionDigits: 3 })} Mt</td>
                 </tr>
               </tfoot>

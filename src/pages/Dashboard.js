@@ -91,7 +91,10 @@ export default function Dashboard() {
   const [quantidadetotal, setQuantidadeTotal] = useState(0);
   const [totalDivida, setTotalDivida] = useState(0);
   const [quantiDivida,setQuantiDivida] = useState(0);
- 
+  const [totalMerc ,setTotalMerc] = useState(0);
+  const pieChartRef = useRef(null);
+  const pieChartInstanceRef = useRef(null);
+  
  var [quantidadeTotal,setQuant]=useState(0)
   const buscarCargo = () => sessionStorage.getItem("cargo");
   useEffect(() => {
@@ -103,7 +106,7 @@ export default function Dashboard() {
         setQuant(totalVendas);
         const stk= await stok.leitura();
         const mercT = await mercadoria.leitura();
-        const totalMerc = mercT.reduce((acc, venda) => acc + venda.quantidade, 0);
+    
         var valorTotalVendas = 0
         var quantidadeTotal = 0;
         var quantidadeTotal2 = 0;
@@ -152,17 +155,17 @@ export default function Dashboard() {
         let contador2 = 0;
   
         mercadorias.forEach((e) => {
-          if (e.tipo.toLowerCase() === "entrada") {
-            contador1 += e.quantidade;
+          if (!stockSelecionado|| (stockSelecionado && stockSelecionado == e.stock.idstock)) {
+          if (e.tipo!=null) {
+            contador1 += e.quantidade_est;
           }
-          if (e.tipo.toLowerCase() === "saida") {
+          if (e.tipo!=null) {
             contador2 += e.quantidade;
           }
+        }
         });
-        console.log("Mercadorias:", mercadorias);
-console.log("Quantidade de entradas:", contador1);
-console.log("Valor de entrada no estado:", entrada);
-  
+
+         setTotalMerc(contador2)
         setEntradada(contador1.toFixed(2));
         setSaida(totalVendas.toFixed(2));
       } catch (error) {
@@ -247,7 +250,48 @@ console.log("Valor de entrada no estado:", entrada);
         },
       });
     }
+
     // Isso só será executado quando useVenda ou useData mudarem
+    // grafico Pizza
+    useEffect(() => {
+      if (cards.length > 0 && pieChartRef.current) {
+        const ctx = pieChartRef.current.getContext("2d");
+    
+        if (pieChartInstanceRef.current) {
+          pieChartInstanceRef.current.destroy();
+        }
+    
+        pieChartInstanceRef.current = new Chart(ctx, {
+          type: "pie",
+          data: {
+            labels: ["Entradas", "Saidas"],
+            datasets: [
+              {
+                data: [entrada, (Number(cards[3])+Number(cards[2])).toFixed(2)],
+                backgroundColor: [
+                  "rgba(54, 162, 235, 0.6)",
+                  "rgba(255, 99, 132, 0.6)",
+                ],
+                borderColor: [
+                  "rgba(54, 162, 235, 1)",
+                  "rgba(255, 99, 132, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top",
+              },
+            },
+          },
+        });
+      }
+    }, [cards]);
+    
   
   return (
     <>
@@ -258,6 +302,7 @@ console.log("Valor de entrada no estado:", entrada);
           {loading && <Loading></Loading>}
           <label>Filtrar por Stock:</label>
           <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)}>
+          <option>Selecione Um Stock</option>
             {modelo2.map((stock) => (
               <option key={stock.idstock} value={stock.idstock}>
                 Stock {stock.tipo}
@@ -295,12 +340,17 @@ console.log("Valor de entrada no estado:", entrada);
             )}
             <div className="card total-stock">
               <h3>Total Saídas</h3>
-              <p id="totalsaida">{saida}</p>
+              <p id="totalsaida">{(Number(cards[3])+Number(cards[2])).toFixed(2)}</p>
             </div>
           </div>
 
-          <div>
-            <canvas id="salesChart" ref={chartRef}></canvas>
+          <div className="canvas_graficos ">
+            <canvas id="salesChart "  ref={chartRef}></canvas>
+          {/* grafico Pizza */}
+          <div style={{ maxWidth: "400px", margin: "2rem auto" }}>
+            <h3 style={{ textAlign: "center" }}>Distribuição de Stock</h3>
+            <canvas ref={pieChartRef}></canvas>
+          </div>
           </div>
 
           {(buscarCargo()==="admin" && dadosParaExportar ) && (
