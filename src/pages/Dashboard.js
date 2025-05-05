@@ -13,6 +13,35 @@ import Loading from "../components/loading";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+export default function Dashboard() {
+  const clientes = new ClienteRepository();
+  const mercadoria = new repositorioMercadoria();
+  const stok = new repositorioStock();
+  const vendas = new repositorioVenda();
+  const chartRef = useRef(null);
+  const chartInstanceRef = useRef(null);
+  const [cards, setCard] = useState([]);
+  const [modelo2, setModelo2] = useState([]);
+  const [entrada, setEntradada] = useState(0);
+  const [saida, setSaida] = useState(0);
+  const [useVenda, setVenda] = useState([]);
+  const [useData, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [dadosParaExportar, setDadosParaExportar] = useState(null);
+  const [stockSelecionado,setLoteS] = useState(0)
+  const [mesSelecionado, setMesSelecionado] = useState("");
+
+  const [total, setTotal] = useState(0);
+  const [quantidadetotal, setQuantidadeTotal] = useState(0);
+  const [totalDivida, setTotalDivida] = useState(0);
+  const [quantiDivida,setQuantiDivida] = useState(0);
+  const [totalMerc ,setTotalMerc] = useState(0);
+  const pieChartRef = useRef(null);
+  const pieChartInstanceRef = useRef(null);
+  
+ var [quantidadeTotal,setQuant]=useState(0)
+  const buscarCargo = () => sessionStorage.getItem("cargo");
+  
 // Função para agrupar dados por período
 function agruparPorPeriodo(dados, periodo = "dia") {
   const agrupados = {};
@@ -46,17 +75,44 @@ function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
   // Adiciona os dados básicos
   const wsDados = XLSX.utils.json_to_sheet(dados.infoBasica);
 
-  // Modifica a planilha do gráfico para incluir todos os dados relevantes
-  const wsGrafico = XLSX.utils.json_to_sheet(
-    dados.grafico.map((venda) => ({
-      ID: venda.idvendas,
-      Quantidade: venda.quantidade,
-      ValorUnitario: venda.valor_uni,
-      Data: venda.data,
-      ValorTotal: venda.valor_total,
-      // Aqui você pode adicionar outras colunas se necessário
-    }))
-  );
+      // Modifica a planilha do gráfico para incluir todos os dados relevantes
+      const vendasFiltradas = dados.grafico
+      .filter((venda) => {
+        const dataVenda = new Date(venda.data);
+        const anoMes = `${dataVenda.getFullYear()}-${String(dataVenda.getMonth() + 1).padStart(2, '0')}`;
+
+        return venda.mercadorias.some((o) => {
+          return (
+            (!mesSelecionado || anoMes === mesSelecionado) &&
+            (!stockSelecionado || stockSelecionado == o.stock.idstock)
+          );
+        });
+      });
+
+    const wsGrafico = XLSX.utils.json_to_sheet(
+      vendasFiltradas.map((venda) => ({
+        ID: venda.idvendas,
+        Quantidade: venda.quantidade.toFixed(2).replace('.', ','),
+        ValorUnitario: venda.valor_uni,
+        Data: venda.data,
+        ValorTotal: venda.valor_total.toFixed(2).replace('.', ','),
+        Mercadoria: venda.mercadorias.map((e) => e.nome).join(', ')
+      }))
+    );
+
+    // Calcular totais
+    const totalQuantidade = vendasFiltradas.reduce((acc, venda) => acc + venda.quantidade, 0);
+    const totalValor = vendasFiltradas.reduce((acc, venda) => acc + venda.valor_total, 0);
+
+    // Adicionar linha com totais
+    XLSX.utils.sheet_add_json(wsGrafico, [{
+      ID: 'TOTAL',
+      Quantidade: totalQuantidade.toFixed(2).replace('.', ','),
+      ValorTotal: totalValor.toFixed(2).replace('.', ',')
+    }], { skipHeader: true, origin: -1 });  // origin -1 adiciona ao final
+
+      
+  
 
   // Cria o workbook e adiciona as planilhas
   const wb = XLSX.utils.book_new();
@@ -71,37 +127,16 @@ function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
   saveAs(blob, nomeArquivo);
 }
 
-export default function Dashboard() {
-  const clientes = new ClienteRepository();
-  const mercadoria = new repositorioMercadoria();
-  const stok = new repositorioStock();
-  const vendas = new repositorioVenda();
-  const chartRef = useRef(null);
-  const chartInstanceRef = useRef(null);
-  const [cards, setCard] = useState([]);
-  const [modelo2, setModelo2] = useState([]);
-  const [entrada, setEntradada] = useState(0);
-  const [saida, setSaida] = useState(0);
-  const [useVenda, setVenda] = useState([]);
-  const [useData, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [dadosParaExportar, setDadosParaExportar] = useState(null);
-  const [stockSelecionado,setLoteS] = useState(0)
-  const [total, setTotal] = useState(0);
-  const [quantidadetotal, setQuantidadeTotal] = useState(0);
-  const [totalDivida, setTotalDivida] = useState(0);
-  const [quantiDivida,setQuantiDivida] = useState(0);
-  const [totalMerc ,setTotalMerc] = useState(0);
-  const pieChartRef = useRef(null);
-  const pieChartInstanceRef = useRef(null);
-  
- var [quantidadeTotal,setQuant]=useState(0)
-  const buscarCargo = () => sessionStorage.getItem("cargo");
   useEffect(() => {
     async function card() {
       setLoading(true);
       try {
         const vendasT = await vendas.leitura();
+        // console.log(vendasT.map((venda)=>
+        //   venda.mercadorias.map((e)=>{
+        //     return e.nome
+        //   })
+        // ))
         const totalVendas = vendasT.reduce((acc, venda) => acc + venda.quantidade, 0);
         setQuant(totalVendas);
         const stk= await stok.leitura();
@@ -111,14 +146,18 @@ export default function Dashboard() {
         var quantidadeTotal = 0;
         var quantidadeTotal2 = 0;
         var quantidadeDivida= 0;
-         
-
+   
         vendasT.forEach((e) => {
+          //fintros e calculo  das quantidades totais 
+          const dataVenda = new Date(e.data);
+          const anoMes = `${dataVenda.getFullYear()}-${String(dataVenda.getMonth() + 1).padStart(2, '0')}`;
+          
+  
               e.mercadorias.forEach((o) => {
             
             
             
-                    if (!stockSelecionado|| (stockSelecionado && stockSelecionado == o.stock.idstock)) {
+                    if (   (!mesSelecionado || anoMes === mesSelecionado) && (!stockSelecionado|| (stockSelecionado && stockSelecionado == o.stock.idstock))) {
                       if (e.status_p == "Em_Divida") {
                         quantidadeTotal2 += e.quantidade;
                         quantidadeDivida += e.valor_total;
@@ -155,13 +194,19 @@ export default function Dashboard() {
         let contador2 = 0;
   
         mercadorias.forEach((e) => {
-          if (!stockSelecionado|| (stockSelecionado && stockSelecionado == e.stock.idstock)) {
+     
+          const dataMercadoria = new Date(e.data_entrada);
+          const anoMes = `${dataMercadoria.getFullYear()}-${String(dataMercadoria.getMonth() + 1).padStart(2, '0')}`;
+          
+          if ( (!mesSelecionado || anoMes === mesSelecionado) &&(!stockSelecionado|| (stockSelecionado && stockSelecionado == e.stock.idstock))) {
           if (e.tipo!=null) {
             contador1 += e.quantidade_est;
           }
           if (e.tipo!=null) {
             contador2 += e.quantidade;
           }
+          console.log('anoMes:', anoMes, 'mesSelecionado:', e.data);
+
         }
         });
 
@@ -176,7 +221,7 @@ export default function Dashboard() {
     }
   
     card();
-  }, [stockSelecionado,total,totalDivida,entrada]); // 🔹 Carrega os cartões uma única vez
+  }, [stockSelecionado,total,totalDivida,entrada,mesSelecionado]); // 🔹 Carrega os cartões uma única vez
   
   // Novo useEffect para definir os dados de exportação
   useEffect(() => {
@@ -189,14 +234,15 @@ export default function Dashboard() {
   
         setDadosParaExportar({
           infoBasica: [
-            { label: "Total Clientes", valor: cards[0] },
-            { label: "Total Vendas", valor: Number(cards[3])+Number(cards[2]) },
-            { label: "Total Mercadorias", valor: cards[1] },
-            { label: "Total Vendas Pagas", valor: cards[2] },
-            { label: "Total Vendas Devidas", valor: cards[3] },
-            { label: "Total Saídas", valor: saida },
-            { label: "Total Entradas", valor: entrada },
+            { label: "Total Clientes", valor: Number(cards[0]).toFixed(2).replace('.', ',') },
+            { label: "Total Vendas", valor: (Number(cards[3]) + Number(cards[2])).toFixed(2).replace('.', ',') },
+            { label: "Total Mercadorias", valor: Number(cards[1]).toFixed(2).replace('.', ',') },
+            { label: "Total Vendas Pagas", valor: Number(cards[2]).toFixed(2).replace('.', ',')},
+            { label: "Total Vendas Devidas", valor: Number(cards[3]).toFixed(2).replace('.', ',') },
+            { label: "Total Saídas", valor: Number(saida).toFixed(2).replace('.', ',')},
+            { label: "Total Entradas", valor: Number(entrada).toFixed(2).replace('.', ',')},
           ],
+          
           grafico: dados,
           labels: labels,
         });
@@ -309,6 +355,14 @@ export default function Dashboard() {
               </option>
             ))}
           </select>
+          <label>Filtrar por Mês:</label>
+            <input
+              type="month"
+              value={mesSelecionado}
+              onChange={(e) => setMesSelecionado(e.target.value)}
+              style={{ marginBottom: "1rem", display: "block" }}
+            />
+
           <div className="dashboard">
             <div className="card total-clients">
               <h3>Total Clientes</h3>
@@ -326,7 +380,8 @@ export default function Dashboard() {
               <h3> Vendas Em Divida</h3>
               <p id="totalSales">{totalDivida.toFixed(2)} kg</p>
             </div>
-            {(buscarCargo() === "admin"|| buscarCargo()==="funcionario") && (
+            {(buscarCargo() === "admin"|| buscarCargo()==="gerente") && (
+              
               <>
                 <div className="card total-goods">
                   <h3>Total Mercadorias Disponiveis</h3>

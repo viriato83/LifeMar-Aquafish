@@ -29,9 +29,34 @@ export default function VendasView() {
   const repositorioClient= new ClienteRepository()
   const msg = useRef(null);
   const moda = useRef(null);
-  const [stockSelecionado,setLoteS] = useState(0)
+  const [stockSelecionado,setLoteS] = useState(0);
+  const [mesSelecionado, setMesSelecionado] = useState("");
+
   const [totalDivida, setTotalDivida] = useState(0);
   const [quantiDivida,setQuantiDivida] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false);
+const [mensagem, setMensagem] = useState("");
+const [clienteParaPagar, setClienteParaPagar] = useState(null);
+
+const handlePagarClick = (elemento) => {
+  setMensagem(`Deseja validar o pagamento do ${elemento.cliente.nome}?`);
+  setClienteParaPagar(elemento);
+  setModalOpen(true);
+};
+
+const confirmarPagamento = async () => {
+  try {
+    await pagar(clienteParaPagar.cliente.idclientes, clienteParaPagar.idvendas);
+
+  } catch (err) {
+    console.error("Erro ao pagar:", err);
+    alert("Erro ao efetuar pagamento.");
+  } finally {
+    setModalOpen(false);
+    window.location.reload(); // Só recarrega após conclusão
+  }
+};
+
  
   useEffect(() => {
     msg.current = new Mensagem();
@@ -52,11 +77,16 @@ export default function VendasView() {
          
 
         dadosModelo.forEach((e) => {
+          
+          const dataMercadoria = new Date(e.data);
+          const anoMes = `${dataMercadoria.getFullYear()}-${String(dataMercadoria.getMonth() + 1).padStart(2, '0')}`;
+          
+         
               e.mercadorias.forEach((o) => {
             
             
             
-                    if (!stockSelecionado|| (stockSelecionado && stockSelecionado == o.stock.idstock)) {
+                if ( (!mesSelecionado || anoMes === mesSelecionado)&&(!stockSelecionado|| (stockSelecionado && stockSelecionado == o.stock.idstock))) {
                       if (e.status_p == "Em_Divida") {
                         quantidadeTotal2 += e.quantidade;
                         quantidadeDivida += e.valor_total;
@@ -90,7 +120,7 @@ export default function VendasView() {
    
 
     carregarDados();
-  }, [stockSelecionado]);
+  }, [stockSelecionado,mesSelecionado]);
 
   const exportarParaExcel = () => {
     const dados = modelo.map((venda) => ({
@@ -138,7 +168,7 @@ export default function VendasView() {
         <Content>
         <h2 >Vendas</h2>
         
-        <label>  Filtrar por Stock:</label>
+        <label>    Filtrar por Stock:</label>
           <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)}>
           <option>Selecione Um Stock</option>
             {modelo2.map((stock) => (
@@ -147,6 +177,14 @@ export default function VendasView() {
               </option>
             ))}
           </select>
+          <label>Filtrar por Mês:</label>
+        <input
+          type="month"
+          value={mesSelecionado}
+          onChange={(e) => setMesSelecionado(e.target.value)}
+          style={{ marginBottom: "1rem", display: "block" }}
+        />
+
           <div className="tabela">
             <table>
               <thead>
@@ -163,9 +201,13 @@ export default function VendasView() {
                 </tr>
               </thead>
               <tbody>
-              {modelo.filter((elemento) =>
-                  !stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado)
-                )
+              {modelo.filter((elemento) =>{
+                  const dataVenda = new Date(elemento.data);
+                  const anoMes = `${dataVenda.getFullYear()}-${String(dataVenda.getMonth() + 1).padStart(2, '0')}`;
+                  
+              
+                return  ( !mesSelecionado || anoMes === mesSelecionado) &&(!stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado))
+                })
                 .map((elemento, i) => {
                    let estado=""
                    if(elemento.status_p==="Pago"){
@@ -195,26 +237,25 @@ export default function VendasView() {
                                 {elemento.mercadorias.map((mercadoria) => `${mercadoria.idmercadoria} : ${mercadoria.nome}`).join(", ")}
                               </td>
                               <td><span className={estado}>{elemento.status_p}</span></td>
-                                  <td>{elemento.status_p=="Em_Divida"&&(
-                                      <button className="btn bg-success" onClick={()=>{
-                                        moda.current.Abrir("Deseja Validar o pagamento do " + elemento.cliente.nome);
-                                        document.querySelector(".sim").addEventListener("click", () => {
-                                          try{
+                              <>
+                                    <td>
+                                      {elemento.status_p === "Em_Divida" && (
+                                        <button className="btn bg-success" onClick={() => handlePagarClick(elemento)}>Pagar</button>
+                                      )}
+                                    </td>
 
-                                            pagar(elemento.cliente.idclientes,elemento.idvendas)
-                                          }catch{
-                                            console.log("erro")
-                                          }finally{
-
-                                            window.location.reload();
-                                          }
-                                        });
-                                        document.querySelector(".nao").addEventListener("click", () => {
-                                          moda.current.fechar();
-                                        });
-                                      }}>Pagar</button>
-                                  )}</td>
-
+                                    {modalOpen && (
+                                      <div className="modal">
+                                        <div className="modal-content">
+                                        <p>{mensagem}</p>
+                                        <div class="buttons">
+                                        <button className=" sim" onClick={confirmarPagamento}>Sim</button>
+                                        <button className=" nao" onClick={() => setModalOpen(false)}>Não</button>
+                                        </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </>
                             </tr>
                            
                            
@@ -235,7 +276,7 @@ export default function VendasView() {
                     </tfoot>
                   
             </table>
-            {(permissao === "admin" || permissao === "funcionario") && (
+            {(permissao === "admin" || permissao === "gerente") && (
               <div className="crud">
                 <button className="editar" onClick={() => {
                   if (id) {
