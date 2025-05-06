@@ -56,7 +56,7 @@ export default function Slider() {
             </ul>
           </li>
 
-          {buscarCargo() === "admin" || buscarCargo() === "funcionario" ? (
+          {(buscarCargo() !== "vendedor")? (
             <>
               <li>
                 <Link onClick={() =>{ toggleMenu("stock-menu");setActive1(!active1)}} className=  {` dropdown-toggle toggle-menu bg-${active1? "primary":""}`}>
