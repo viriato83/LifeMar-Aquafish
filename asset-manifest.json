@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/static/css/main.de7e10d5.css",
-    "main.js": "/static/js/main.a656bc1e.js",
+    "main.js": "/static/js/main.5147f038.js",
     "static/js/488.1d4ce58e.chunk.js": "/static/js/488.1d4ce58e.chunk.js",
     "static/media/logo_lifemar.png": "/static/media/logo_lifemar.4de2c7a5e8782935987e.png",
     "index.html": "/index.html",
     "main.de7e10d5.css.map": "/static/css/main.de7e10d5.css.map",
-    "main.a656bc1e.js.map": "/static/js/main.a656bc1e.js.map",
+    "main.5147f038.js.map": "/static/js/main.5147f038.js.map",
     "488.1d4ce58e.chunk.js.map": "/static/js/488.1d4ce58e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.de7e10d5.css",
-    "static/js/main.a656bc1e.js"
+    "static/js/main.5147f038.js"
   ]
 }
