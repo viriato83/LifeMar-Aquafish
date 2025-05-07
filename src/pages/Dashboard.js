@@ -30,7 +30,7 @@ export default function Dashboard() {
   const [dadosParaExportar, setDadosParaExportar] = useState(null);
   const [stockSelecionado,setLoteS] = useState(0)
   const [mesSelecionado, setMesSelecionado] = useState("");
-
+  const [Dados2,setDados2]=useState([])
   const [total, setTotal] = useState(0);
   const [quantidadetotal, setQuantidadeTotal] = useState(0);
   const [totalDivida, setTotalDivida] = useState(0);
@@ -74,7 +74,51 @@ function agruparPorPeriodo(dados, periodo = "dia") {
 function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
   // Adiciona os dados básicos
   const wsDados = XLSX.utils.json_to_sheet(dados.infoBasica);
+      //mercadorias ou entradas
+  const MercadoriasFIltradas=Dados2.filter((merc) => {
+    const dataMerc = new Date(merc.data_entrada);
+    const anoMes = `${dataMerc.getFullYear()}-${String(dataMerc.getMonth() + 1).padStart(2, '0')}`;
 
+    return(
+        (!mesSelecionado || anoMes === mesSelecionado) &&
+        (!stockSelecionado || stockSelecionado == merc.stock.idstock)
+      )
+      
+    
+  });
+  const wsEntradas = XLSX.utils.json_to_sheet(
+    MercadoriasFIltradas.map((merc) => ({
+      ID: merc.idmercadoria,
+      Nome: merc.nome,
+      Quantidade: merc.quantidade_est.toFixed(2).replace('.', ','),
+      Quantidade_Disponivel: merc.quantidade.toFixed(2).replace('.', ','),
+      ValorUnitario: merc.valor_un,
+      Data: merc.data_entrada,
+      ValorTotal: merc.valor_total.toFixed(2).replace('.', ','),
+      Stock: merc.stock.idstock,
+      Usuario: merc.usuario==null?"0":merc.usuario.login
+    }))
+  );
+   // Calcular totais
+   const totalQuantidadeMerc = MercadoriasFIltradas.reduce((acc, merc) => acc + merc.quantidade_est, 0);
+   const totalValorMerc = MercadoriasFIltradas.reduce((acc, merc) => acc + merc.valor_total, 0);
+    const totalDisponivel=MercadoriasFIltradas.reduce((acc,merc)=>acc+merc.quantidade,0)
+   // Adicionar linha com totais
+   XLSX.utils.sheet_add_json(wsEntradas, [{
+     ID: 'TOTAL',
+     Quantidade: totalQuantidadeMerc.toFixed(2).replace('.', ','),
+     ValorTotal: totalValorMerc.toFixed(2).replace('.', ','),
+    
+   }], { skipHeader: true, origin: -1 });  // origin -1 adiciona ao final
+
+   XLSX.utils.sheet_add_json(wsEntradas, [{
+    ID: 'Disponivel',
+
+    Quantidade_Disponivel: totalDisponivel.toFixed(2).replace('.', ',')
+  }], { skipHeader: true, origin: -1 });  // origin -1 adiciona ao final
+
+
+    // vendas ou saidas
       // Modifica a planilha do gráfico para incluir todos os dados relevantes
       const vendasFiltradas = dados.grafico
       .filter((venda) => {
@@ -96,19 +140,38 @@ function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
         ValorUnitario: venda.valor_uni,
         Data: venda.data,
         ValorTotal: venda.valor_total.toFixed(2).replace('.', ','),
-        Mercadoria: venda.mercadorias.map((e) => e.nome).join(', ')
+        Status:venda.status_p,
+        Mercadoria: venda.mercadorias.map((e) => e.nome).join(', '),
+
+        Usuario: venda.usuario==null?"0":venda.usuario.login
       }))
     );
 
     // Calcular totais
     const totalQuantidade = vendasFiltradas.reduce((acc, venda) => acc + venda.quantidade, 0);
     const totalValor = vendasFiltradas.reduce((acc, venda) => acc + venda.valor_total, 0);
+    let temp=0;
+    let temp2=0;
+    const Dividas=vendasFiltradas.map((e)=>{
+      if(e.status_p=="Em_Divida"){
+         temp+=e.valor_total;
+         temp2+=e.quantidade;
+      }
+      
+    })
 
+    
     // Adicionar linha com totais
     XLSX.utils.sheet_add_json(wsGrafico, [{
       ID: 'TOTAL',
       Quantidade: totalQuantidade.toFixed(2).replace('.', ','),
-      ValorTotal: totalValor.toFixed(2).replace('.', ',')
+      ValorTotal: totalValor.toFixed(2).replace('.', ','),
+   
+    }], { skipHeader: true, origin: -1 });  // origin -1 adiciona ao final
+    XLSX.utils.sheet_add_json(wsGrafico, [{
+      ID: 'TOTAL Divida',
+      quantidadeTotal_divida:temp2.toFixed(2).replace('.', ','),
+      totalDivida:temp.toFixed(2).replace('.', ','),
     }], { skipHeader: true, origin: -1 });  // origin -1 adiciona ao final
 
       
@@ -116,8 +179,9 @@ function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
 
   // Cria o workbook e adiciona as planilhas
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, wsDados, "Dados");
-  XLSX.utils.book_append_sheet(wb, wsGrafico, "Gráfico");
+  XLSX.utils.book_append_sheet(wb, wsDados, "Dados_Resumo");
+  XLSX.utils.book_append_sheet(wb, wsGrafico, "Saidas");
+  XLSX.utils.book_append_sheet(wb, wsEntradas, "Entradas");
 
   // Converte para um buffer de Excel e cria o Blob
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -228,6 +292,8 @@ function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
     if (cards.length > 0) {  // 🔹 Certifica-se de que os dados já foram carregados antes de definir os dados para exportação
       async function setGrafico() {
         const dados = await vendas.leitura();
+        const dados2= await mercadoria.leitura()
+        setDados2(dados2)
         const { labels, valores } = agruparPorPeriodo(dados, "mes");
         setVenda(valores);
         setData(labels);

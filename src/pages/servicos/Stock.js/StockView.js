@@ -74,7 +74,9 @@ export default function StockView() {
                   <th>ID</th>
                   <th>Quantidade</th>
                   <th>Tipo</th>
-                  {/* <th>Mercadoria</th> */}
+                            {(permissao === "admin" )&&
+                             <th>Usuario</th>
+                            }
                  
                 </tr>
               </thead>
@@ -84,6 +86,9 @@ export default function StockView() {
                     <td>{elemento.idstock}</td>
                     <td>{elemento.quantidade} </td>
                     <td>{elemento.tipo}</td>
+                   {(permissao === "admin" )&&
+                            <td>{elemento.usuario!=null?elemento.usuario.login:0}</td>
+                            }
                    
                    
                   </tr>
@@ -96,6 +101,7 @@ export default function StockView() {
                 </tr>
               </tfoot>
             </table>
+            {(permissao == "admin" || permissao == "gerente") && ( 
             <div className="crud">
               <button
                 className="editar"
@@ -142,6 +148,9 @@ export default function StockView() {
                 Apagar
               </button>
             </div>
+            )
+
+            }
             {permissao==="admin" &&( <button onClick={exportToExcel} className="btn-export">
                 Exportar para Excel
               </button>)}

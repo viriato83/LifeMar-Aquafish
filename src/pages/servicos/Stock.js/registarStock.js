@@ -20,11 +20,12 @@ export default function RegistarStock() {
   const { id } = useParams();
   const msg = new mensagem();
   const repositorio = new repositorioStock();
-  const usuario= localStorage.getItem("idusuarios");
+  const usuario= sessionStorage.getItem("idusuarios");
   useEffect(() => {
     // Busca de mercadorias ao carregar o componente
     const fetchMercadorias = async () => {
       try {
+        console.log(usuario)
         const repositorioMerc = new repositorioMercadoria();
         const data = await repositorioMerc.leitura();
         setMercadorias(data);
@@ -55,6 +56,7 @@ export default function RegistarStock() {
       repositorio.editar(id, criaStock());
       msg.sucesso("Stock editado com sucesso.");
     } else {
+      console.log(criaStock())
       repositorio.cadastrar(criaStock());
       msg.sucesso("Stock cadastrado com sucesso.");
       setInputs({ quantidade: "", tipo: "", mercadoria: "" }); // Limpar formulário

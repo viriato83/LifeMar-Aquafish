@@ -27,7 +27,7 @@ export default function RegistarMercadoria() {
   const { id } = useParams();
   let msg= new mensagem();
   let repositorio = new repositorioMercadoria();
-  const usuario= localStorage.getItem("idusuarios");
+  const usuario= sessionStorage.getItem("idusuarios");
 
   useEffect(() => {
     // msg =;
@@ -69,11 +69,11 @@ export default function RegistarMercadoria() {
       limparFormulario(); // Limpa o formulário após editar
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 2000);
     } else {
       if (
         !inputs.nome ||
-      
+    
         !inputs.quantidade ||
         !inputs.dataEntrada ||
         !inputs.valorUnitario ||
@@ -87,7 +87,7 @@ export default function RegistarMercadoria() {
         limparFormulario(); // Limpa o formulário após cadastrar
         setTimeout(() => {
           window.location.reload();
-        }, 1000);
+        }, 2000);
       }
     }
   };
@@ -116,16 +116,16 @@ export default function RegistarMercadoria() {
              
                 onChange={(e) => setInputs({ ...inputs, nome: e.target.value })}
               />
-              <br />
-              {/* <label>Tipo:</label>
+              {/* <br />
+              <label>Tipo:</label>
               <input
                 type="text"
                 className="tipo"
                 placeholder="Saída ou Entrada"
                 value={inputs.tipo}
                 onChange={(e) => setInputs({ ...inputs, tipo: e.target.value })}
-              />
-              <br /> */}
+              /> */}
+              <br />
               <label>Quantidade: kg</label>
               <input
                 type="number"

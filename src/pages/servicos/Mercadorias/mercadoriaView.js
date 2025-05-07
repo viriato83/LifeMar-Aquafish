@@ -25,10 +25,10 @@ const permissao= sessionStorage.getItem("cargo");
   const msg = useRef(null); // UseRef para manter uma instância estável
   const moda = useRef(null);
   const [quantidadeTotal, setQuantidadeTotal] = useState(0);
-  const [quantidadeEst, setQuantidadeEst] = useState(0);
   const [stockSelecionado,setLoteS] = useState(0)
   const [qSaidas, setQSaidas] = useState(0);
   const [modelo2, setModelo2] = useState([]);
+  const [quantidadeEst, setQuantidadeEst] = useState(0);
   const repoStco= new repositorioStock();
   useEffect(() => {
     // Inicializa as instâncias uma vez
@@ -43,7 +43,7 @@ const permissao= sessionStorage.getItem("cargo");
         const dadosVendas= await repositoriovenda.leitura();
        let valorTotalVendas=0;
        let  quantidadeTotal=0;
-       let quantidadeEst=0;
+       let  quantidadeEst=0;
         dadosModelo.forEach((e) => {
     
                 if (!stockSelecionado|| (stockSelecionado && stockSelecionado == e.stock.idstock)) {
@@ -56,7 +56,8 @@ const permissao= sessionStorage.getItem("cargo");
 
         });
        
-        const quantidadeTotalVendas = dadosModelo.reduce((acc, merc) => acc + merc.valor_total, 0);
+        const quantidadeTotalVendas = dadosModelo.reduce((acc, merc) => 
+          acc + merc.valor_total, 0);
         setQuantidadeEst(quantidadeEst)
         setModelo(dadosModelo);
         setTotal(quantidadeTotal);
@@ -114,7 +115,7 @@ const permissao= sessionStorage.getItem("cargo");
           <h2 >Mercadorias </h2>
           <label>    Filtrar por Stock:</label>
           <select value={stockSelecionado} onChange={(e) => setLoteS(Number(e.target.value))}>
-            <option>Selecione Um Stock</option>
+          <option>Selecione Um Stock</option>
             {modelo2.map((stock) => (
               <option key={stock.idstock} value={stock.idstock}>
                 Stock {stock.tipo}
@@ -136,10 +137,14 @@ const permissao= sessionStorage.getItem("cargo");
                   {/* <th>Q Saidas</th> */}
                   <th>Data de Saída</th>
                   <th>Stock</th>
+                  {(permissao === "admin" )&&
+                          <th> Usuario</th>
+                          }
                 </tr>
               </thead>
               <tbody>
               {modelo.map((elemento, i) => {
+                console.log(elemento)
                     if (!stockSelecionado || elemento.stock.idstock == stockSelecionado) {
                       return (
                         <tr key={i}>
@@ -159,6 +164,9 @@ const permissao= sessionStorage.getItem("cargo");
                           {/* <td>{elemento.q_saidas}</td> */}
                           <td>{elemento.data_saida}</td>
                           <td>{elemento.stock.idstock} : {elemento.stock.tipo}</td>
+                            {(permissao === "admin" )&&
+                            <td>{elemento.usuario!=null?elemento.usuario.login:0}</td>
+                            }
                         </tr>
                       );
                     } else {
@@ -173,10 +181,10 @@ const permissao= sessionStorage.getItem("cargo");
                   <td>{quantidadeEst.toFixed(2)} kg </td>
 
                   <td>{total.toFixed(2)} kg   Disponiveis</td>
-                  <td>{quantidadeTotal.toLocaleString("pt-PT", { minimumFractionDigits: 3 })} Mt</td>
                 </tr>
               </tfoot>
             </table>
+            {(permissao === "admin" || permissao === "gerente") && ( 
             <div className="crud">
               <button
                 className="editar"
@@ -224,6 +232,7 @@ const permissao= sessionStorage.getItem("cargo");
               </button>
               {/* Botão para exportar para Excel */}
             </div>
+            )}
             {permissao==="admin" &&(  <button
                 onClick={exportToExcel}
                 className="btn-export"

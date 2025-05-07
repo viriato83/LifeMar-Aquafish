@@ -198,6 +198,9 @@ const confirmarPagamento = async () => {
                   <th>Mercadorias</th>
                   <th>Status</th>
                   <th>Ações</th>
+                 {(permissao === "admin" )&&
+                            <th>Usuario</th>
+                            }
                 </tr>
               </thead>
               <tbody>
@@ -256,6 +259,9 @@ const confirmarPagamento = async () => {
                                       </div>
                                     )}
                                   </>
+                                  {(permissao === "admin" )&&
+                                  <td>{elemento.usuario!=null?elemento.usuario.login:0}</td>
+                                  }
                             </tr>
                            
                            

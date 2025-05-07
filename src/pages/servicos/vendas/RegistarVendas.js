@@ -26,6 +26,7 @@ export default function RegistarVenda() {
 
   const [clientes, setClientes] = useState([]); // Lista dinâmica de clientes
   const [mercadorias, setMercadorias] = useState([]); // Lista dinâmica de mercadorias
+  const usuario= sessionStorage.getItem("idusuarios");
   const { id } = useParams();
   let msg = new mensagem();
   let repositorio = new repositorioVenda();
@@ -46,7 +47,6 @@ export default function RegistarVenda() {
             setStaus(e.idclientes)
           }
       })
-  
     };
 
 
@@ -56,7 +56,7 @@ export default function RegistarVenda() {
       setMercadorias(data);
     };
 
-    console.log(inputs.mercadoria)
+  
     fetchClientes();
     fetchMercadorias();
   }, []);
@@ -94,7 +94,8 @@ export default function RegistarVenda() {
       inputs.data,
       inputs.cliente,
       inputs.mercadoria,
-      inputs.status_p
+      inputs.status_p,
+      usuario
     );
   };
 
@@ -128,6 +129,9 @@ export default function RegistarVenda() {
        }
       msg.sucesso("Venda editada com sucesso.");
       limparFormulario();
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } else {
       if (
         !inputs.quantidade ||
@@ -175,6 +179,9 @@ export default function RegistarVenda() {
             msg.Erro("O cliente Contem Divida")
           }
         limparFormulario()
+        // setTimeout(() => {
+        //   window.location.reload();
+        // }, 2000);
       } catch (error) {
         msg.Erro(`Erro ao cadastrar venda.`);
       }
@@ -286,11 +293,9 @@ export default function RegistarVenda() {
                           {mercadoria.nome} :: {mercadoria.quantidade} Kg
                           </option>
                   ))}
-
                   </optgroup>
                 ))}
               </select>
-
               <br />
             </div>
             <button onClick={cadastrar} className="cadastrarVenda">
