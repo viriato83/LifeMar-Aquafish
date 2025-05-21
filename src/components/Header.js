@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import logo from "../logo_lifemar.png"
+import { CiLogout } from "react-icons/ci";
 export default function Header(){
     function Sair(){
         sessionStorage.clear()
@@ -21,7 +22,7 @@ export default function Header(){
         <img src={logo} alt="Logo" width="130px" />
         </div>
         <h1>LifeMar </h1>
-        <button className="sair" onClick={(Sair)}>Sair</button>
+        <button className="sair" onClick={(Sair)}><CiLogout  />Sair</button>
     </header>
     </>)
 }

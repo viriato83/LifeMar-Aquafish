@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi"; // Ícones de menu
-
+import { MdDashboard } from "react-icons/md";
 
 export default function Slider() {
   const [activeMenu, setActiveMenu] = useState(null);
@@ -39,7 +39,7 @@ export default function Slider() {
         <ul>
           <li>
             <Link id="dashboard" to="/" className="toggle-menu">
-              Dashboard
+            <MdDashboard /> Dashboard
             </Link>
           </li>
           <li>

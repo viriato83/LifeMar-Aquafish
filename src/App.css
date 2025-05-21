@@ -1,0 +1,31 @@
+input.pesquisa{
+    outline: none;
+    border:none;
+    margin-bottom: 10px ;
+    box-shadow: 1px 1px 1px 1px rgb(163, 160, 160);
+}
+.mensagem2{
+    z-index: 4000;
+}
+/* factura */
+@media print {
+    body {
+      width: 58mm;
+      font-size: 10px;
+      margin: 0;
+      padding: 0;
+    }
+  
+    .fatura {
+      width: 100%;
+    }
+  
+    .fatura td, .fatura th {
+      padding: 2px 4px;
+    }
+  
+    .no-print {
+      display: none;
+    }
+  }
+  

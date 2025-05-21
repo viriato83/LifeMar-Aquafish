@@ -14,6 +14,8 @@ import { saveAs } from "file-saver";
 import ClienteRepository from "../Clientes/ClienteRepository";
 import repositorioStock from "../Stock.js/Repositorio";
 import repositorioMercadoria from "../Mercadorias/Repositorio";
+import { ItemRepository } from "./VendaItem/ItemRepository";
+import Item from "./VendaItem/Item";
 
 export default function VendasView() {
   const repositorio = new repositorioVenda();
@@ -31,6 +33,8 @@ export default function VendasView() {
   const moda = useRef(null);
   const [stockSelecionado,setLoteS] = useState(0);
   const [mesSelecionado, setMesSelecionado] = useState("");
+  const Itemrepositorio= new ItemRepository();
+  const[Item,setItem]=useState([])
 
   const [totalDivida, setTotalDivida] = useState(0);
   const [quantiDivida,setQuantiDivida] = useState(0);
@@ -68,6 +72,7 @@ const confirmarPagamento = async () => {
         const dadosModelo = await repositorio.leitura();
         const repositoriomerc = await repositorioMerc.leitura();
         const repoStck = await repoStco.leitura();
+        const item= await Itemrepositorio.leitura();
         const dadosTotal = await repositorio.total();
         const quantidadeTotalVendas = dadosModelo.reduce((acc, venda) => acc + venda.valor_total, 0);
         var valorTotalVendas = 0
@@ -88,11 +93,17 @@ const confirmarPagamento = async () => {
             
                 if ( (!mesSelecionado || anoMes === mesSelecionado)&&(!stockSelecionado|| (stockSelecionado && stockSelecionado == o.stock.idstock))) {
                       if (e.status_p == "Em_Divida") {
-                        quantidadeTotal2 += e.quantidade;
-                        quantidadeDivida += e.valor_total;
+                        e.itensVenda.forEach((item) => {
+                          quantidadeTotal2 += item.quantidade;
+                          quantidadeDivida += e.valor_total;
+                        })
                       }else{
-                      quantidadeTotal += e.quantidade;
-                      valorTotalVendas += e.valor_total;
+                        e.itensVenda.forEach((item) => {
+                            quantidadeTotal +=item.quantidade;
+                    
+                            valorTotalVendas += e.valor_total;
+                        })
+                    
                       }
               
                   } 
@@ -100,6 +111,7 @@ const confirmarPagamento = async () => {
               });
             });
         setModelo2(repoStck)
+        setItem(item)
         setQuantiDivida(quantidadeDivida);
         setModelo(dadosModelo);
         setTotal(quantidadeTotal);
@@ -166,9 +178,11 @@ const confirmarPagamento = async () => {
       <Conteinner>
         <Slider />
         <Content>
-        <h2 >Vendas</h2>
-        
+
+
+        {/* {Filtro} */}
         <label>    Filtrar por Stock:</label>
+         <img src=""></img>
           <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)}>
           <option>Selecione Um Stock</option>
             {modelo2.map((stock) => (
@@ -222,13 +236,14 @@ const confirmarPagamento = async () => {
                   if(elemento.status_p==="Pendente"){
                     estado="bg-warning p-2"
                   }
+                  // console.log(elemento)
                
                         return (
                   
                             <tr key={i}>
                               <td>{elemento.idvendas}</td>
-                              <td>{elemento.quantidade} kg</td>
-                              <td>{elemento.valor_uni} Mt</td>
+                              <td>{elemento.itensVenda.map(e=><p key={e.id}>{e.quantidade}</p>)} kg</td>
+                              <td>{elemento.itensVenda.map(e=><p key={e.id}>{e.valor_uni}</p>)} Mt</td>
                               <td>{elemento.data}</td>
                               <td>
                                 {elemento.valor_total.toLocaleString("pt-PT", {
@@ -261,6 +276,7 @@ const confirmarPagamento = async () => {
                                   </>
                                   {(permissao === "admin" )&&
                                   <td>{elemento.usuario!=null?elemento.usuario.login:0}</td>
+                               
                                   }
                             </tr>
                            

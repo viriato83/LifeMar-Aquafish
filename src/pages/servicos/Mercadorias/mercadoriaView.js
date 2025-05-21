@@ -12,7 +12,7 @@ import Loading from "../../../components/loading";
 import * as XLSX from "xlsx";  // Import the xlsx library
 import { repositorioVenda } from "../vendas/vendasRepositorio";
 import repositorioStock from "../Stock.js/Repositorio";
-
+import { FaSearch } from "react-icons/fa";
 export default function MercadoriaView() {
   const repositorio = new RepositorioMercadoria();
   const repositoriovenda= new repositorioVenda()
@@ -30,6 +30,8 @@ const permissao= sessionStorage.getItem("cargo");
   const [modelo2, setModelo2] = useState([]);
   const [quantidadeEst, setQuantidadeEst] = useState(0);
   const repoStco= new repositorioStock();
+  const [termoPesquisa, setTermoPesquisa] = useState("");
+
   useEffect(() => {
     // Inicializa as instâncias uma vez
     msg.current = new Mensagem();
@@ -111,8 +113,20 @@ const permissao= sessionStorage.getItem("cargo");
       <Conteinner>
         <Slider />
         <Content>
-          
           <h2 >Mercadorias </h2>
+         {/* {pesquisa } */}
+
+        <label> <FaSearch />
+        Pesquisar:</label>
+        <input
+          type="search"
+          className="pesquisa"
+          placeholder="Pesquisar por nome "
+          onChange={(e) => setTermoPesquisa(e.target.value.toLowerCase())}
+        />
+
+
+        {/* {Filtro} */}
           <label>    Filtrar por Stock:</label>
           <select value={stockSelecionado} onChange={(e) => setLoteS(Number(e.target.value))}>
           <option>Selecione Um Stock</option>
@@ -143,11 +157,20 @@ const permissao= sessionStorage.getItem("cargo");
                 </tr>
               </thead>
               <tbody>
-              {modelo.map((elemento, i) => {
-                console.log(elemento)
-                    if (!stockSelecionado || elemento.stock.idstock == stockSelecionado) {
-                      return (
-                        <tr key={i}>
+              {modelo
+                .filter((elemento) => {
+                  const nome = elemento.nome?.toLowerCase() || "";
+                  const tipo = elemento.tipo?.toLowerCase() || "";
+                  const pesquisa = termoPesquisa.trim();
+
+                  // Aplica filtro de texto e filtro de stock ao mesmo tempo
+                  return (
+                    (!stockSelecionado || elemento.stock.idstock == stockSelecionado) &&
+                    (nome.includes(pesquisa) || tipo.includes(pesquisa))
+                  );
+                })
+                .map((elemento, i) =>  {
+                        return (<tr key={i}>
                           <td>{elemento.idmercadoria}</td>
                           <td>{elemento.nome}</td>
                           <td>{elemento.tipo}</td>
@@ -167,12 +190,11 @@ const permissao= sessionStorage.getItem("cargo");
                             {(permissao === "admin" )&&
                             <td>{elemento.usuario!=null?elemento.usuario.login:0}</td>
                             }
-                        </tr>
-                      );
-                    } else {
-                      return null; // Ignora se não corresponder ao filtro
-                    }
+                        </tr>)
+                      
+                  
                   })}
+                  
 
               </tbody>
               <tfoot>

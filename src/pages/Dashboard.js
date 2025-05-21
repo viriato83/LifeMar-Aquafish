@@ -136,8 +136,8 @@ function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
     const wsGrafico = XLSX.utils.json_to_sheet(
       vendasFiltradas.map((venda) => ({
         ID: venda.idvendas,
-        Quantidade: venda.quantidade.toFixed(2).replace('.', ','),
-        ValorUnitario: venda.valor_uni,
+        Quantidade: venda.itensVenda.reduce((acc, venda) => acc + venda.quantidade, 0).toFixed(2).replace('.', ','),
+        ValorUnitario:venda.itensVenda.reduce((acc, venda) => acc + venda.valor_uni, 0),
         Data: venda.data,
         ValorTotal: venda.valor_total.toFixed(2).replace('.', ','),
         Status:venda.status_p,
@@ -148,14 +148,14 @@ function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
     );
 
     // Calcular totais
-    const totalQuantidade = vendasFiltradas.reduce((acc, venda) => acc + venda.quantidade, 0);
+    const totalQuantidade = vendasFiltradas.reduce((acc, e) => acc + e.itensVenda.reduce((acc, venda) => acc + venda.quantidade, 0), 0);
     const totalValor = vendasFiltradas.reduce((acc, venda) => acc + venda.valor_total, 0);
     let temp=0;
     let temp2=0;
     const Dividas=vendasFiltradas.map((e)=>{
       if(e.status_p=="Em_Divida"){
          temp+=e.valor_total;
-         temp2+=e.quantidade;
+         temp2+=e.itensVenda.reduce((acc, venda) => acc + venda.quantidade, 0);
       }
       
     })
@@ -223,11 +223,16 @@ function exportarParaExcel(dados, nomeArquivo = "dados.xlsx") {
             
                     if (   (!mesSelecionado || anoMes === mesSelecionado) && (!stockSelecionado|| (stockSelecionado && stockSelecionado == o.stock.idstock))) {
                       if (e.status_p == "Em_Divida") {
-                        quantidadeTotal2 += e.quantidade;
-                        quantidadeDivida += e.valor_total;
+                        e.itensVenda.forEach((item) => {
+                          quantidadeTotal2 += item.quantidade;
+                          quantidadeDivida += e.valor_total;
+                        })
                       }else{
-                      quantidadeTotal += e.quantidade;
-                      valorTotalVendas += e.valor_total;
+                        e.itensVenda.forEach((item) => {
+                            quantidadeTotal +=item.quantidade;
+                            console.log(item.quantidade)
+                            valorTotalVendas += e.valor_total;
+                        })
                       }
               
                   } 
