@@ -68,7 +68,7 @@ export default function Login({ children }) {
           <input
             type="text"
             id="username"
-            placeholder="Matricula"
+            placeholder="Nome do Usuario"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required

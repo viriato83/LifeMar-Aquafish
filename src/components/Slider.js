@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi"; // Ícones de menu
 import { MdDashboard } from "react-icons/md";
 
@@ -38,9 +38,9 @@ export default function Slider() {
       <nav className={`sidebar ${sidebarOpen ? "active" : ""}`}>
         <ul>
           <li>
-            <Link id="dashboard" to="/" className="toggle-menu">
-            <MdDashboard /> Dashboard
-            </Link>
+          <NavLink to="/" className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}>
+              <MdDashboard /> Dashboard
+            </NavLink>
           </li>
           <li>
             <Link onClick={() =>{ toggleMenu("clientes-menu"); setActive(!active)}} className=  {` dropdown-toggle toggle-menu bg-${active? "primary":""}`}>

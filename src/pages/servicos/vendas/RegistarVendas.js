@@ -4,12 +4,12 @@ import Content from "../../../components/Content";
 import Header from "../../../components/Header";
 import Slider from "../../../components/Slider";
 import Footer from "../../../components/Footer";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import mensagem from "../../../components/mensagem";
 import repositorioStock from "../Stock.js/Repositorio";
  // Adicionar repositório de clientes
  import Select from "react-select";
-
+ import { HiArrowSmRight } from "react-icons/hi";
 import { repositorioVenda } from "./vendasRepositorio";
 import vendas from "./Vendas";
 import repositorioMercadoria from "../Mercadorias/Repositorio";
@@ -34,6 +34,7 @@ export default function RegistarVenda() {
   let repositorio = new repositorioVenda();
   const mercadoriaRepo = new repositorioMercadoria();
   const clienteRepo = new ClienteRepository();
+  const[lastId,setLastId]=useState((0))
   let Cadastro =true; //
   let saidas=0;
   let [status,setStaus]=useState(0)
@@ -57,8 +58,8 @@ export default function RegistarVenda() {
     
       const data = await mercadoriaRepo.leitura(); // Assumindo que listar retorna as mercadorias
       setMercadorias(data);
+      setLastId(await repositorio.getIdLast())
     };
-
   
     fetchClientes();
     fetchMercadorias();
@@ -152,20 +153,20 @@ const imprimirFatura = () => {
   });
 
   const faturaWindow = window.open("", "_blank");
- 
-  const logoBase64=`/logo_lifemar.png`
+    // body {
+          //   width: 58mm;
+          //   font-family: monospace;
+          //   font-size: 10px;
+          //   padding: 0;
+          //   margin: 0;
+          // }
+  const logoBase64=`/logo_white-removebg2.png`
   faturaWindow.document.write(`
     <html>
       <head>
         <title>Recibo</title>
         <style>
-          body {
-            width: 58mm;
-            font-family: monospace;
-            font-size: 10px;
-            padding: 0;
-            margin: 0;
-          }
+       
           .container {
             padding: 5px;
             width: 100%;
@@ -190,9 +191,12 @@ const imprimirFatura = () => {
       <body>
         <div class="container">
           <img src="${logoBase64}" width="80px" />
-          <h3>Lifemar, Lda</h3>
-          <p>E.N.1 - Quissico</p>
+          <h3>Aquafish Sociedade Unipessoal, Lda</h3>
+          <p>Bairo Nove, Distrito de Zavala</p>
+           <p>+258 84 2446503</p>
+           <p>NUIT: 401 232 125</p>
           <div class="linha"></div>
+          <p><strong>Factura Nº: </strong>${lastId}</p>
           <p><strong>Cliente:</strong> ${cliente_nome}</p>
           <p><strong>Data:</strong> ${inputs.data}</p>
           <div class="linha"></div>
@@ -216,7 +220,7 @@ const imprimirFatura = () => {
             }).join("")}
           </table>
           <div class="linha"></div>
-          <p class="right"><strong>Total: ${
+          <p class="right"><strong>IVA ISENTO   Total: ${
             inputs.mercadoria.reduce((soma, _, i) => {
               const qtd = Number(inputs.quantidade?.[i] || 0);
               const valor = Number(inputs.valorUnitario?.[i] || 0);
@@ -294,15 +298,18 @@ const cadastrar = async () => {
 
   try {
     if (inputs.cliente !== status) {
-      await repositorio.cadastrar(criaVenda());
-      console.log(criaVenda())
+      let vendaCriada = await repositorio.cadastrar(criaVenda());
+      // let idVenda = vendaCriada.idvendas; // <-- isso depende do nome retornado pelo backend
+      
+      console.log("Idvendas"+vendaCriada)
+       
 
       // Atualizar mercadorias - espera arrays para mercadorias e quantidades
       novaMercadoria.forEach((e)=>{
-        mercadoriaRepo.editar3(e.idmercadoria, e.novaQuantidade);
+        // mercadoriaRepo.editar3(e.idmercadoria, e.novaQuantidade);
         // console.log(e.idmercadoria, e.novaQuantidade)
       })
-      // await mercadoriaRepo.editar3(inputs.mercadoria, novaMercadoria);
+     
       console.log("Mercadorias selecionadas:", inputs.mercadoria);
       console.log("Novas quantidades:", novaMercadoria);
 
@@ -321,7 +328,7 @@ const cadastrar = async () => {
           const novaSaida =
             Number(mercadoriaOriginal.q_saidas || 0) +
             Number(inputs.quantidade[i]);
-          mercadoriaRepo.editar2(idMercadoria, inputs.data, novaSaida);
+          // mercadoriaRepo.editar2(idMercadoria, inputs.data, novaSaida);
            console.log("saidas"+idMercadoria, inputs.data, novaSaida)
         }
       });
@@ -363,7 +370,10 @@ const cadastrar = async () => {
       <Conteinner>
         <Slider />
         <Content>
-      
+          <Link className="go_link" to="/vendasview">Lista
+        <HiArrowSmRight className="go" /> 
+
+          </Link>
              {Imprimir?(
               <div className="mensagem2 alert alert-success alert-dismissible z-3">Venda cadastrada com sucesso. 
                 

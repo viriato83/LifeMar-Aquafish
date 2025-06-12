@@ -28,4 +28,29 @@ input.pesquisa{
       display: none;
     }
   }
+  .back{
+    font-size: 30px;
+    /* position: absolute ;
+    left: 20%;
+    top: 25%; */
+  }
+  .back_link{
+    position: absolute ;
+    left: 20%;
+    top: 25%;
+  }
+  .go_link{
+    position: absolute ;
+    left: 90%;
+    top: 25%;
+
+  }
+  .go{
+    font-size: 30px;
+  }
+  .active1 {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+  }
   

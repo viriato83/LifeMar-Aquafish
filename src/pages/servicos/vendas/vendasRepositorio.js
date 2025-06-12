@@ -33,7 +33,35 @@ export class repositorioVenda{
         
         }
       }
+      async  getIdLast() {
+        try {
+          
+          const res = await fetch(this.endpoint+"/proximo-id", {  // Adicione 'await' e utilize o this.endpoint
+            method: 'GET',
+            
+            headers: {
+              'Authorization': `Bearer ${this.token}`,
+              'Content-Type': 'application/json'
+            }
+          });
     
+          if (res.status== 200) {
+            const data = await res.json();
+
+                    
+    
+            console.log('Dados Id o ultimo:', data);
+            return data;
+          } else {
+            console.log('Erro ao fazer a leitura:', res.status);
+            this.mensagem.Erro("Erro ao fazer a leitura")
+            return [];
+          }
+        } catch (err) {
+          console.error('Erro ao fazer a leitura:', err);
+          return [];
+        }
+      } 
       async  leitura() {
         try {
           

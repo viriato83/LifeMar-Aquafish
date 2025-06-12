@@ -3,7 +3,7 @@ import Header from "../../../components/Header";
 import Conteinner from "../../../components/Conteinner";
 import Slider from "../../../components/Slider";
 import Content from "../../../components/Content";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from "../../../components/modal";
 import Mensagem from "../../../components/mensagem";
 import Footer from "../../../components/Footer";
@@ -16,6 +16,9 @@ import repositorioStock from "../Stock.js/Repositorio";
 import repositorioMercadoria from "../Mercadorias/Repositorio";
 import { ItemRepository } from "./VendaItem/ItemRepository";
 import Item from "./VendaItem/Item";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 export default function VendasView() {
   const repositorio = new repositorioVenda();
@@ -41,7 +44,7 @@ export default function VendasView() {
   const [modalOpen, setModalOpen] = useState(false);
 const [mensagem, setMensagem] = useState("");
 const [clienteParaPagar, setClienteParaPagar] = useState(null);
-
+const[Data,setData]=useState("")
 const handlePagarClick = (elemento) => {
   setMensagem(`Deseja validar o pagamento do ${elemento.cliente.nome}?`);
   setClienteParaPagar(elemento);
@@ -92,6 +95,7 @@ const confirmarPagamento = async () => {
             
             
                 if ( (!mesSelecionado || anoMes === mesSelecionado)&&(!stockSelecionado|| (stockSelecionado && stockSelecionado == o.stock.idstock))) {
+                    setData(anoMes)
                       if (e.status_p == "Em_Divida") {
                         e.itensVenda.forEach((item) => {
                           quantidadeTotal2 += item.quantidade;
@@ -171,6 +175,170 @@ const confirmarPagamento = async () => {
   }
   const permissao = sessionStorage.getItem("cargo");
 
+
+  const carregarImagem = (src) =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+  
+  
+  const  gerarPDF = async() => {
+    const doc = new jsPDF();
+    // Criação dos dados
+    const vendasFiltradas = modelo.filter((elemento) => {
+      const dataVenda = new Date(elemento.data);
+      const anoMes = `${dataVenda.getFullYear()}-${String(dataVenda.getMonth() + 1).padStart(2, '0')}`;
+    
+      return (!mesSelecionado || anoMes === mesSelecionado) &&
+             (!stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado));
+    });
+  
+    const tableData = vendasFiltradas.map((venda) => [
+      venda.idvendas,
+      venda.data,
+      venda.cliente.nome,
+      venda.itensVenda.map(e => e.quantidade).join(", ") + " kg",
+      venda.itensVenda.map(e => e.valor_uni).join(", ") + " Mt",
+      venda.valor_total.toLocaleString("pt-PT", { minimumFractionDigits: 3 }) + " Mt",
+      venda.mercadorias.map(m => `${m.nome}`).join(", "),
+      venda.status_p
+    ]);
+  
+    // Título
+    const logo = await carregarImagem("/logo_white-removebg2.png");
+
+  doc.addImage(logo, 'PNG', 90, 10, 30, 15);
+    doc.setFontSize(18);
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Informações da empresa
+    const empresaInfo = `Aquafish Sociedade Unipessoal, Lda
+    Bairro Nove, Distrito de Zavala
+    +258 84 2446503
+    NUIT: 401 232 125`;
+    
+    // Ajusta a fonte e tamanho
+    doc.setFontSize(10);
+    
+    // Divide o texto em linhas e centraliza cada uma
+    empresaInfo.split('\n').forEach((linha, i) => {
+      doc.text(linha, pageWidth / 2, 30 + (i * 5), { align: 'center' });
+    });
+    
+    // Título do relatório (com mais destaque)
+    doc.setFontSize(14);
+    doc.text(`Relatório de Vendas - Facturas- ${mesSelecionado} `, pageWidth / 2, 50, { align: 'center' });
+    doc.setTextColor(100);
+  
+    // Tabela com autoTable
+    autoTable(doc, {
+      startY: 60,
+      head: [["Factura Nº", "Data", "Cliente", "Quant.", "Preço Unit.", "Total", "Mercadorias", "Status"]],
+      body: tableData,
+      styles: { fontSize: 9 }
+    });
+  
+    doc.save("facturas_vendas.pdf");
+  };
+
+  function imprimirFatura(id,cliente,data,mercadoria,quantidade,status_p){
+    const faturaWindow = window.open("", "_blank");
+    // body {
+          //   width: 58mm;
+          //   font-family: monospace;
+          //   font-size: 10px;
+          //   padding: 0;
+          //   margin: 0;
+          // }
+  const logoBase64=`/logo_white-removebg2.png`
+  faturaWindow.document.write(`
+    <html>
+      <head>
+        <title>Recibo</title>
+        <style>
+       
+          .container {
+            padding: 5px;
+            width: 100%;
+            text-align: center;
+          }
+          .linha {
+            border-top: 1px dashed #000;
+            margin: 5px 0;
+          }
+          .tabela {
+            width: 100%;
+            text-align: left;
+          }
+          .tabela td {
+            padding: 2px 0;
+          }
+          .right {
+            text-align: right;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <img src="${logoBase64}" width="80px" />
+          <h3>Aquafish Sociedade Unipessoal, Lda</h3>
+          <p>Bairo Nove, Distrito de Zavala</p>
+           <p>+258 84 2446503</p>
+           <p>NUIT: 401 232 125</p>
+          <div class="linha"></div>
+          <p><strong>Factura Nº: </strong>${id}</p>
+          <p><strong>Cliente:</strong> ${cliente}</p>
+          <p><strong>Data:</strong> ${data}</p>
+          <div class="linha"></div>
+          <table class="tabela">
+            ${mercadoria.map((id, index) => {
+              const nome = mercadoria ? id.nome : `#${id}`;
+              const qtd = Number(quantidade.map(e=>e.quantidade)?.[index] || 0);
+              const valor = Number(quantidade.map(e=>e.valor_uni)?.[index] || 0);
+              const total = qtd * valor;
+
+              return `
+                <tr>
+                  <td colspan="2">${nome}</td>
+                </tr>
+                <tr>
+                  <td>${qtd} x ${valor.toFixed(2)}</td>
+                  <td class="right">${total.toFixed(2)} MZN</td>
+                </tr>
+              `;
+            }).join("")}
+          </table>
+          <div class="linha"></div>
+          <p class="right"><strong>IVA ISENTO   Total: ${
+            mercadoria.reduce((soma, _, i) => {
+              const qtd = Number(quantidade.map(e=>e.quantidade)?.[i] || 0);
+              const valor = Number(quantidade.map(e=>e.valor_uni)?.[i] || 0);
+              return soma + (qtd * valor);
+            }, 0).toFixed(2)
+          } MZN</strong></p>
+          <p><strong>Status:</strong> ${status_p}</p>
+          <div class="linha"></div>
+          <p>Obrigado pela compra!</p>
+        </div>
+      </body>
+    </html>
+  `);
+
+  }
+  
+ 
+  
   return (
     <>
       {loading && <Loading />} 
@@ -178,7 +346,11 @@ const confirmarPagamento = async () => {
       <Conteinner>
         <Slider />
         <Content>
-
+       
+        <Link to="/registarvenda" className="back_link">
+        <IoMdArrowRoundBack  className="back"/> 
+            Cadastro
+        </Link>
 
         {/* {Filtro} */}
         <label>    Filtrar por Stock:</label>
@@ -198,6 +370,9 @@ const confirmarPagamento = async () => {
           onChange={(e) => setMesSelecionado(e.target.value)}
           style={{ marginBottom: "1rem", display: "block" }}
         />
+<button onClick={gerarPDF} className="btn btn-success" style={{ marginBottom: "1rem" }}>
+  Imprimir Facturas (PDF)
+</button>
 
           <div className="tabela">
             <table>
@@ -212,9 +387,10 @@ const confirmarPagamento = async () => {
                   <th>Mercadorias</th>
                   <th>Status</th>
                   <th>Ações</th>
+                  <th>Imprimir F</th>
                  {(permissao === "admin" )&&
                             <th>Usuario</th>
-                            }
+                          }
                 </tr>
               </thead>
               <tbody>
@@ -274,6 +450,7 @@ const confirmarPagamento = async () => {
                                       </div>
                                     )}
                                   </>
+                                  <button className="btn btn-primary" onClick={()=>{imprimirFatura(elemento.idvendas,elemento.cliente.nome,elemento.data,elemento.mercadorias,elemento.itensVenda,elemento.status_p)}}>Imprimir</button>
                                   {(permissao === "admin" )&&
                                   <td>{elemento.usuario!=null?elemento.usuario.login:0}</td>
                                
