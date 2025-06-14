@@ -298,16 +298,12 @@ const cadastrar = async () => {
 
   try {
     if (inputs.cliente !== status) {
-      let vendaCriada = await repositorio.cadastrar(criaVenda());
-      // let idVenda = vendaCriada.idvendas; // <-- isso depende do nome retornado pelo backend
-      
-      console.log("Idvendas"+vendaCriada)
-       
-
+      await repositorio.cadastrar(criaVenda());
+   
       // Atualizar mercadorias - espera arrays para mercadorias e quantidades
       novaMercadoria.forEach((e)=>{
-        // mercadoriaRepo.editar3(e.idmercadoria, e.novaQuantidade);
-        // console.log(e.idmercadoria, e.novaQuantidade)
+        mercadoriaRepo.editar3(e.idmercadoria, e.novaQuantidade);
+        console.log(e.idmercadoria, e.novaQuantidade)
       })
      
       console.log("Mercadorias selecionadas:", inputs.mercadoria);
@@ -328,7 +324,7 @@ const cadastrar = async () => {
           const novaSaida =
             Number(mercadoriaOriginal.q_saidas || 0) +
             Number(inputs.quantidade[i]);
-          // mercadoriaRepo.editar2(idMercadoria, inputs.data, novaSaida);
+          mercadoriaRepo.editar2(idMercadoria, inputs.data, novaSaida);
            console.log("saidas"+idMercadoria, inputs.data, novaSaida)
         }
       });
