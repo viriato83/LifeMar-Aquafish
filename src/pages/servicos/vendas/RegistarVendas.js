@@ -56,9 +56,13 @@ export default function RegistarVenda() {
 
     const fetchMercadorias = async () => {
     
-      const data = await mercadoriaRepo.leitura(); // Assumindo que listar retorna as mercadorias
-      setMercadorias(data);
-      setLastId(await repositorio.getIdLast())
+      const fetchMercadorias = async () => {
+        const data = await mercadoriaRepo.leitura();
+        // Filtrar apenas mercadorias com quantidade maior que 0
+        const mercadoriasDisponiveis = data.filter(m => parseFloat(m.quantidade) > 0);
+        setMercadorias(mercadoriasDisponiveis);
+        setLastId(await repositorio.getIdLast());
+      };
     };
   
     fetchClientes();
@@ -303,11 +307,11 @@ const cadastrar = async () => {
       // Atualizar mercadorias - espera arrays para mercadorias e quantidades
       novaMercadoria.forEach((e)=>{
         mercadoriaRepo.editar3(e.idmercadoria, e.novaQuantidade);
-        console.log(e.idmercadoria, e.novaQuantidade)
+        // console.log(e.idmercadoria, e.novaQuantidade)
       })
      
-      console.log("Mercadorias selecionadas:", inputs.mercadoria);
-      console.log("Novas quantidades:", novaMercadoria);
+      // console.log("Mercadorias selecionadas:", inputs.mercadoria);
+      // console.log("Novas quantidades:", novaMercadoria);
 
       // Atualizar status do cliente, se necessário
       if (inputs.status_p) {
@@ -325,7 +329,7 @@ const cadastrar = async () => {
             Number(mercadoriaOriginal.q_saidas || 0) +
             Number(inputs.quantidade[i]);
           mercadoriaRepo.editar2(idMercadoria, inputs.data, novaSaida);
-           console.log("saidas"+idMercadoria, inputs.data, novaSaida)
+          //  console.log("saidas"+idMercadoria, inputs.data, novaSaida)
         }
       });
 
