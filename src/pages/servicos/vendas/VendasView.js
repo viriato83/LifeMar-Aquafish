@@ -152,10 +152,10 @@ const confirmarPagamento = async () => {
     // Adicionar linha com o total
     dados.push({
       ID: "TOTAL",
-      Quantidade: quantidadeTotal, // Adiciona o total de quantidades
+      Quantidade: total, // Adiciona o total de quantidades
       "Valor Unitário": "", 
       Data: "",
-      "Valor Total": total, // Adiciona o valor total das vendas
+      "Valor Total": quantidadeTotal, // Adiciona o valor total das vendas
       Cliente: "",
       "Mercadorias": "",
     });
@@ -223,7 +223,7 @@ const confirmarPagamento = async () => {
     const pageWidth = doc.internal.pageSize.getWidth();
 
     // Informações da empresa
-    const empresaInfo = `Aquafish Sociedade Unipessoal, Lda
+    const empresaInfo = `LifeMar 
     Bairro Nove, Distrito de Zavala
     +258 84 2446503
     NUIT: 401 232 125`;
@@ -291,8 +291,8 @@ const confirmarPagamento = async () => {
       </head>
       <body>
         <div class="container">
-          <img src="${logoBase64}" width="80px" />
-          <h3>Aquafish Sociedade Unipessoal, Lda</h3>
+          <img src="" alt="LifeMAr Logo" width="80px" />
+          <h3>LifeMar</h3>
           <p>Bairo Nove, Distrito de Zavala</p>
            <p>+258 84 2446503</p>
            <p>NUIT: 401 232 125</p>
@@ -418,7 +418,7 @@ const confirmarPagamento = async () => {
                   
                             <tr key={i}>
                               <td>{elemento.idvendas}</td>
-                              <td>{elemento.itensVenda.map(e=><p key={e.id}>{e.quantidade}</p>)} kg</td>
+                              <td>{elemento.itensVenda.map(e=><p key={e.id}>{e.quantidade}</p>)} </td>
                               <td>{elemento.itensVenda.map(e=><p key={e.id}>{e.valor_uni}</p>)} Mt</td>
                               <td>{elemento.data}</td>
                               <td>

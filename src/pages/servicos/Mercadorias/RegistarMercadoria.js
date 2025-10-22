@@ -10,6 +10,7 @@ import mensagem from "../../../components/mensagem";
 import repositorioStock from "../Stock.js/Repositorio";
 import Mercadoria from "./Mercadoria";
 import repositorioMercadoria from "./Repositorio";
+import stock from "../Stock.js/Stock";
 
 
 export default function RegistarMercadoria() {
@@ -28,23 +29,31 @@ export default function RegistarMercadoria() {
   let msg= new mensagem();
   let repositorio = new repositorioMercadoria();
   const usuario= sessionStorage.getItem("idusuarios");
-
+  const estoqueRepo = new repositorioStock();
   useEffect(() => {
     // msg =;
-
+  
     
     // Buscar estoques do backend
     const fetchEstoques = async () => {
-      const estoqueRepo = new repositorioStock();
+   
       const data = await estoqueRepo.leitura(); // Assumindo que `listar` retorna os estoques
       setEstoques(data);
     };
 
     fetchEstoques();
-    console.log(criaMercadoria())
-    console.log(inputs.estoque)
+   
   }, []);
-
+  function calculaQuantidadeStock() {
+    let stock = estoques.find((e) => e.idstock == inputs.estoque);
+    if (stock) {
+      return stock.quantidade-Number(inputs.quantidade)
+    }
+    else{
+      console.log("stock nao encotrado")
+    }
+  }
+  
   const criaMercadoria = () => {
     return new Mercadoria(inputs.nome,"Entrada",inputs.quantidade,inputs.quantidade,inputs.dataEntrada,inputs.valorUnitario,inputs.dataSaida,usuario,inputs.estoque) 
       
@@ -60,9 +69,9 @@ export default function RegistarMercadoria() {
       estoque: "",
     });
   };
-  
 
-  const cadastrar = () => {
+
+  const cadastrar =  async() => {
     if (id) {
       repositorio.editar(id, criaMercadoria());
       msg.sucesso("Mercadoria editada com sucesso.");
@@ -81,13 +90,19 @@ export default function RegistarMercadoria() {
       ) {
         msg.Erro("Preencha corretamente todos os campos obrigatórios");
       } else {
-        repositorio.cadastrar(criaMercadoria());
-        localStorage.setItem("quantidade",JSON.stringify(quantidade))
-        msg.sucesso("Mercadoria cadastrada com sucesso.");
-        limparFormulario(); // Limpa o formulário após cadastrar
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+             if(calculaQuantidadeStock()>0){
+              await repositorio.cadastrar(criaMercadoria());
+              await  estoqueRepo.editar(inputs.estoque,new stock(0,calculaQuantidadeStock(),"","","",0))
+              localStorage.setItem("quantidade",JSON.stringify(quantidade))
+              msg.sucesso("Mercadoria cadastrada com sucesso.");
+              limparFormulario(); // Limpa o formulário após cadastrar
+              setTimeout(() => {
+                window.location.reload();
+              }, 2000);
+             }
+             else{
+              msg.Erro("Stock Insuficiente")
+             }
       }
     }
   };
@@ -126,11 +141,11 @@ export default function RegistarMercadoria() {
                 onChange={(e) => setInputs({ ...inputs, tipo: e.target.value })}
               /> */}
               <br />
-              <label>Quantidade: kg</label>
+              <label>Quantidade</label>
               <input
                 type="number"
                 className="quantidade"
-                placeholder="Quantidade kg"
+                placeholder="Quantidade Unitaria"
                 value={inputs.quantidade==null?null:inputs.quantidade}
                 onChange={(e) =>
                   setInputs({ ...inputs, quantidade: e.target.value })
@@ -168,19 +183,19 @@ export default function RegistarMercadoria() {
                 }
               /> */}
               <br />
-              <label>Estoque:</label>
+              <label>Stock:</label>
               <select
                 className="estoque"
                 onChange={(e) =>
                   setInputs({ ...inputs, estoque: e.target.value })
                 }
               >
-                <option value="">Selecione um estoque
+                <option value="">Selecione um Stock
                 
                 </option>
                 {estoques.map((estoque) => (
                   <option key={estoque.idstock} value={estoque.idstock} >
-                   {estoque.idstock}. {estoque.tipo}
+                   {estoque.idstock}. {estoque.tipo} :: {estoque.quantidade}
                   </option>
                 ))}
               </select>

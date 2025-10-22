@@ -51,11 +51,10 @@ export default function RegistarVenda() {
           }
       })
     };
-    console.log(inputs.mercadoria+"valor "+inputs.valorUnitario)
+    console.log(mercadoria)
 
 
-    const fetchMercadorias = async () => {
-    
+
       const fetchMercadorias = async () => {
         const data = await mercadoriaRepo.leitura();
         // Filtrar apenas mercadorias com quantidade maior que 0
@@ -63,10 +62,10 @@ export default function RegistarVenda() {
         setMercadorias(mercadoriasDisponiveis);
         setLastId(await repositorio.getIdLast());
       };
-    };
+
+    fetchMercadorias();
   
     fetchClientes();
-    fetchMercadorias();
  
   }, [inputs.mercadoria,inputs.valorUnitario]);
 
@@ -345,6 +344,7 @@ const cadastrar = async () => {
 };
 
   
+console.log(mercadorias)
   const agruparMercadorias = () => {
     const grupos = mercadorias.reduce((acc, merc) => {
       const grupo = `Stock ${merc.stock?.idstock} - ${merc.stock?.tipo}`;
@@ -352,7 +352,7 @@ const cadastrar = async () => {
       if (merc.quantidade !== 0) {
         acc[grupo].push({
           value: merc.idmercadoria,
-          label: `${merc.nome} :: ${merc.quantidade} Kg`
+          label: `${merc.nome} :: ${merc.quantidade} `
         });
       }
       return acc;
@@ -479,7 +479,7 @@ const cadastrar = async () => {
             type="number"
             min="0"
             step="0.01"
-            placeholder="Quantidade em kg"
+            placeholder="Quantidade unitaria"
             className="quantidade"
             value={inputs.quantidade?.[index] || ""}
             onChange={(e) => {

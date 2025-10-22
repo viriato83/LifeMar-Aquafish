@@ -14,6 +14,7 @@ export default function RegistarStock() {
   const [inputs, setInputs] = useState({
     quantidade: "",
     tipo: "",
+    data:"",
     mercadoria: "",
   });
   const [mercadorias, setMercadorias] = useState([]);
@@ -38,7 +39,7 @@ export default function RegistarStock() {
   }, []);
 
   const criaStock = () => {
-    return new stock(inputs.quantidade, inputs.tipo,usuario, inputs.mercadoria);
+    return new stock(inputs.quantidade,inputs.quantidade, inputs.tipo,usuario,inputs.data, inputs.mercadoria);
   };
 
   const validarCampos = () => {
@@ -59,7 +60,7 @@ export default function RegistarStock() {
       console.log(criaStock())
       repositorio.cadastrar(criaStock());
       msg.sucesso("Stock cadastrado com sucesso.");
-      setInputs({ quantidade: "", tipo: "", mercadoria: "" }); // Limpar formulário
+      setInputs({ quantidade: "", tipo: "", mercadoria: "",data:"" }); // Limpar formulário
     }
   };
 
@@ -76,7 +77,7 @@ export default function RegistarStock() {
               <label>ID:</label>
               <input type="number" value={id || 0} disabled className="id" />
               <br />
-              <label>Quantidade: </label>
+              <label>Quantidade : </label>
               <input
                 type="number"
                 className="quantidade"
@@ -87,13 +88,23 @@ export default function RegistarStock() {
                 }
               />
               <br />
-              <label>Tipo:</label>
+              <label>Nome:</label>
               <input
                 type="text"
                 className="tipo"
-                placeholder="Tipo"
+                placeholder="Nome ou Tipo"
                 value={inputs.tipo}
                 onChange={(e) => setInputs({ ...inputs, tipo: e.target.value })}
+              />
+              <br />
+              <label>Data </label>
+              <input
+                type="date"
+                className="dataEntrada"
+                value={inputs.data}
+                onChange={(e) =>
+                  setInputs({ ...inputs, data: e.target.value })
+                }
               />
               <br />
               {/* <label>Mercadoria:

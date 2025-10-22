@@ -144,7 +144,7 @@ const permissao= sessionStorage.getItem("cargo");
                   <th>Nome</th>
                   <th>Tipo</th>
                   <th>Quantidade</th>
-                  <th>Quantidade Disponivel (kg)</th>
+                  <th>Quantidade Disponivel </th>
                   <th>Data de Entrada</th>
                   <th>Valor unitário</th>
                   <th>Valor total</th>
@@ -200,9 +200,9 @@ const permissao= sessionStorage.getItem("cargo");
               <tfoot>
                 <tr>
                   <td colSpan="4">Total</td>
-                  <td>{quantidadeEst.toFixed(2)} kg </td>
+                  <td>{quantidadeEst.toFixed(2)}  </td>
 
-                  <td>{total.toFixed(2)} kg   Disponiveis</td>
+                  <td>{total.toFixed(2)}   Disponiveis</td>
                 </tr>
               </tfoot>
             </table>

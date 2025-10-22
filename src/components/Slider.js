@@ -84,7 +84,7 @@ export default function Slider() {
                   </li>
                 </ul>
               </li>
-              <li>
+              {/* <li>
                 <Link onClick={() =>{ toggleMenu("mortalidade-menu"); setActive3(!active3)}} className=  {` dropdown-toggle toggle-menu bg-${active3? "primary":""}`}>
                 Mortalidade
                 </Link>
@@ -96,7 +96,7 @@ export default function Slider() {
                     <Link to="/mortalidadeview">Ver Mortalidades Disponíveis</Link>
                   </li>
                 </ul>
-              </li>
+              </li> */}
             </>
           ) : null}
    
