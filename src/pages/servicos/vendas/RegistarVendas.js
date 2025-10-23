@@ -169,139 +169,124 @@ export default function RegistarVenda() {
           img.src = src;
         });
       
-      const imprimirFatura = async () => {
-        let cliente_nome = "";
-        clientes.forEach((e) => {
-          if (e.idclientes == inputs.cliente) {
-            cliente_nome = e.nome;
-          }
-        });
-      
-        const logoBase64 = await carregarImagem("/logo_lifemar2.png");
-        const totalGeral = inputs.mercadoria.reduce((soma, _, i) => {
-          const qtd = Number(inputs.quantidade?.[i] || 0);
-          const valor = Number(inputs.valorUnitario?.[i] || 0);
-          return soma + (qtd * valor);
-        }, 0);
-        const numeroFatura = String(lastId).padStart(5, "0"); 
-        const faturaWindow = window.open("", "_blank");
-        faturaWindow.document.write(`
-          <html>
-            <head>
-              <title>VD${numeroFatura}</title>
-              <style>
-                body {
-                  width: 58mm;
-                  font-family: monospace;
-                  font-size: 10px;
-                  margin: 0;
-                  padding: 0;
-                  color: #000;
-                }
-                .container {
-                  text-align: center;
-                  padding: 5px;
-                }
-                img { width: 60px; margin-bottom: 3px; }
-                h3 { font-size: 12px; margin: 0; }
-                p { margin: 2px 0; }
-                .linha {
-                  border-top: 1px dashed #000;
-                  margin: 5px 0;
-                }
-                table {
-                  width: 100%;
-                  border-collapse: collapse;
-                  font-size: 9px;
-                }
-                th, td {
-                  text-align: left;
-                  padding: 2px 0;
-                }
-                th { border-bottom: 1px dashed #000; }
-                td.right, th.right { text-align: right; }
-                .totais {
-                  margin-top: 5px;
-                  text-align: right;
-                }
-                .footer {
-                  text-align: center;
-                  font-size: 9px;
-                  margin-top: 10px;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="container">
-                <img src="${logoBase64}" alt="Logo"/>
-                <h3>LifeMar</h3>
-                <p>Bairro Nove, Distrito de Zavala</p>
-                <p>+258 82 244 6503</p>
-                <p>NUIT: 401232125</p>
-                <div class="linha"></div>
-                <h4><strong>VENDA A DINHEIRO</strong></h4>
-                <p><strong>Fatura Nº:</strong> VD${numeroFatura}</p>
-                <p><strong>Data:</strong> ${inputs.data}</p>
-                <p><strong>Cliente:</strong> ${cliente_nome}</p>
-                <div class="linha"></div>
-                <table>
-                  <thead>
-                      <tr class="center">
-                        <th>Descrição</th>
-                        <th>Qtd</th>
-                        <th>Preço</th>
-                        <th>Total</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                    ${inputs.mercadoria.map((id, index) => {
-                      const mercadoria = mercadorias.find(m => m.idmercadoria == id);
-                      const nome = mercadoria ? mercadoria.nome : "#"+id;
-                      const qtd = Number(inputs.quantidade?.[index] || 0);
-                      const valor = Number(inputs.valorUnitario?.[index] || 0);
-                      const total = qtd * valor;
-                      return `
-                        <tr>
-                        <td>${qtd}</td>
-                          <td>${nome}</td>
-                          <td>${valor.toFixed(2)}</td>
-                          <td class="right">${total.toFixed(2)}</td>
+        const imprimirFatura = async () => {
+          let cliente_nome = "";
+          clientes.forEach((e) => {
+            if (e.idclientes == inputs.cliente) {
+              cliente_nome = e.nome;
+            }
+          });
+        
+          const logoBase64 = await carregarImagem("/logo_lifemar2.png");
+        
+          // Calcular subtotal
+          const subtotal = inputs.mercadoria.reduce((soma, _, i) => {
+            const qtd = Number(inputs.quantidade?.[i] || 0);
+            const valor = Number(inputs.valorUnitario?.[i] || 0);
+            return soma + (qtd * valor);
+          }, 0);
+        
+          const IVA = subtotal * 0.16; // 16% de IVA
+          const totalGeral = subtotal + IVA; // Total com IVA
+        
+          const numeroFatura = String(lastId).padStart(5, "0"); 
+          const faturaWindow = window.open("", "_blank");
+          faturaWindow.document.write(`
+            <html>
+              <head>
+                <title>VD${numeroFatura}</title>
+                <style>
+                  body {
+                    width: 58mm;
+                    font-family: monospace;
+                    font-size: 10px;
+                    margin: 0;
+                    padding: 0;
+                    color: #000;
+                  }
+                  .container { text-align: center; padding: 5px; }
+                  img { width: 60px; margin-bottom: 3px; }
+                  h3 { font-size: 12px; margin: 0; }
+                  p { margin: 2px 0; }
+                  .linha { border-top: 1px dashed #000; margin: 5px 0; }
+                  table { width: 100%; border-collapse: collapse; font-size: 9px; }
+                  th, td { text-align: left; padding: 2px 0; }
+                  th { border-bottom: 1px dashed #000; }
+                  td.right, th.right { text-align: right; }
+                  .totais { margin-top: 5px; text-align: right; }
+                  .footer { text-align: center; font-size: 9px; margin-top: 10px; }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <img src="${logoBase64}" alt="Logo"/>
+                  <h3>LifeMar</h3>
+                  <p>Bairro Nove, Distrito de Zavala</p>
+                  <p>+258 82 244 6503</p>
+                  <p>NUIT: 401232125</p>
+                  <div class="linha"></div>
+                  <h4><strong>VENDA A DINHEIRO</strong></h4>
+                  <p><strong>Fatura Nº:</strong> VD${numeroFatura}</p>
+                  <p><strong>Data:</strong> ${inputs.data}</p>
+                  <p><strong>Cliente:</strong> ${cliente_nome}</p>
+                  <div class="linha"></div>
+                  <table>
+                    <thead>
+                        <tr class="center">
+                          <th>Descrição</th>
+                          <th>Qtd</th>
+                          <th>Preço</th>
+                          <th>Total</th>
                         </tr>
-                      `;
-                    }).join("")}
-                  </tbody>
-                </table>
-               <div class="linha"></div>
-          <table class="tabela">
-            <tr>
-              <td colspan="3"><strong>Subtotal</strong></td>
-              <td class="right">${totalGeral.toFixed(2)}</td>
-            </tr>
-            <tr>
-              <td colspan="3"><strong>IVA (Isento Art.º 9 CIVA)</strong></td>
-              <td class="right">0.00</td>
-            </tr>
-            <tr class="total">
-              <td colspan="3"><strong>Total Geral (MT)</strong></td>
-              <td class="right">${totalGeral.toFixed(2)}</td>
-            </tr>
-          </table>
-          <div class="linha"></div>
-          <p><strong>Status:</strong> ${inputs.status_p}</p>
-          <div class="footer">
-            <p>Documento processado por computador</p>
-            <p>Isento de IVA ao abrigo do Art.º 9 do CIVA</p>
-            <p>Obrigado pela sua preferência!</p>
-          </div>
-        </div>
-            </body>
-          </html>
-        `);
-      
-        faturaWindow.document.close();
-        faturaWindow.onload = () => faturaWindow.print();
-      };
-      
+                    </thead>
+                    <tbody>
+                      ${inputs.mercadoria.map((id, index) => {
+                        const mercadoria = mercadorias.find(m => m.idmercadoria == id);
+                        const nome = mercadoria ? mercadoria.nome : "#"+id;
+                        const qtd = Number(inputs.quantidade?.[index] || 0);
+                        const valor = Number(inputs.valorUnitario?.[index] || 0);
+                        const total = qtd * valor;
+                        return `
+                          <tr>
+                            <td>${nome}</td>
+                            <td>${qtd}</td>
+                            <td>${valor.toFixed(2)}</td>
+                            <td class="right">${total.toFixed(2)}</td>
+                          </tr>
+                        `;
+                      }).join("")}
+                    </tbody>
+                  </table>
+                  <div class="linha"></div>
+                  <table class="tabela">
+                    <tr>
+                      <td colspan="3"><strong>Subtotal</strong></td>
+                      <td class="right">${subtotal.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3"><strong>IVA (16%)</strong></td>
+                      <td class="right">${IVA.toFixed(2)}</td>
+                    </tr>
+                    <tr class="total">
+                      <td colspan="3"><strong>Total Geral (MT)</strong></td>
+                      <td class="right">${totalGeral.toFixed(2)}</td>
+                    </tr>
+                  </table>
+                  <div class="linha"></div>
+                  <p><strong>Status:</strong> ${inputs.status_p}</p>
+                  <div class="footer">
+                    <p>Documento processado por computador</p>
+                    <p>Obrigado pela sua preferência!</p>
+                  </div>
+                </div>
+              </body>
+            </html>
+          `);
+        
+          faturaWindow.document.close();
+          faturaWindow.onload = () => faturaWindow.print();
+        };
+        
 
 const cadastrar = async () => { 
   if (id) {
