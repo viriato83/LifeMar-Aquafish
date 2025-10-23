@@ -190,154 +190,238 @@ const confirmarPagamento = async () => {
       img.onerror = reject;
       img.src = src;
     });
-  
-  
-  const  gerarPDF = async() => {
-    const doc = new jsPDF();
-    // Criação dos dados
-    const vendasFiltradas = modelo.filter((elemento) => {
-      const dataVenda = new Date(elemento.data);
-      const anoMes = `${dataVenda.getFullYear()}-${String(dataVenda.getMonth() + 1).padStart(2, '0')}`;
+    const gerarPDF = async () => {
+      const doc = new jsPDF("p", "mm", "a4"); // A4 vertical
+      const vendasFiltradas = modelo.filter((elemento) => {
+        const dataVenda = new Date(elemento.data);
+        const anoMes = `${dataVenda.getFullYear()}-${String(dataVenda.getMonth() + 1).padStart(2, "0")}`;
+        return (!mesSelecionado || anoMes === mesSelecionado) &&
+               (!stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado));
+      });
     
-      return (!mesSelecionado || anoMes === mesSelecionado) &&
-             (!stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado));
-    });
-  
-    const tableData = vendasFiltradas.map((venda) => [
-      venda.idvendas,
-      venda.data,
-      venda.cliente.nome,
-      venda.itensVenda.map(e => e.quantidade).join(", ") + " kg",
-      venda.itensVenda.map(e => e.valor_uni).join(", ") + " Mt",
-      venda.valor_total.toLocaleString("pt-PT", { minimumFractionDigits: 3 }) + " Mt",
-      venda.mercadorias.map(m => `${m.nome}`).join(", "),
-      venda.status_p
-    ]);
-  
-    // Título
-    const logo = await carregarImagem("/logo_white-removebg2.png");
-
-  doc.addImage(logo, 'PNG', 90, 10, 30, 15);
-    doc.setFontSize(18);
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-
-    // Informações da empresa
-    const empresaInfo = `LifeMar 
+      const logo = await carregarImagem("/logo_lifemar2.png");
+    
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+    
+      const larguraFatura = pageWidth / 2 - 10; // margem de 5mm
+      const alturaFatura = pageHeight / 2 - 10;
+    
+      for (let i = 0; i < vendasFiltradas.length; i++) {
+        const venda = vendasFiltradas[i];
+        const indexNaPagina = i % 4; // 4 faturas por página
+        const coluna = indexNaPagina % 2;
+        const linha = Math.floor(indexNaPagina / 2);
+    
+        const startX = 10 + coluna * (larguraFatura + 5); // margem de 5mm
+        const startY = 10 + linha * (alturaFatura + 5);
+    
+        // Cabeçalho
+        doc.addImage(logo, "PNG", startX, startY, 20, 10);
+        doc.setFontSize(9);
+        const empresaInfo = `Aquafish Sociedade Unipessoal, Lda
     Bairro Nove, Distrito de Zavala
     +258 84 2446503
-    NUIT: 401 232 125`;
+    NUIT: 401232125`;
+        empresaInfo.split("\n").forEach((linhaTexto, j) => {
+          doc.text(linhaTexto, startX + 25, startY + 4 + j * 4);
+        });
     
-    // Ajusta a fonte e tamanho
-    doc.setFontSize(10);
+        doc.setFontSize(9);
+        doc.text(`Factura VD Nº: ${venda.idvendas}`, startX, startY + 22);
+        doc.text(`Data: ${venda.data}`, startX, startY + 26);
+        doc.text(`Cliente: ${venda.cliente.nome}`, startX, startY + 30);
     
-    // Divide o texto em linhas e centraliza cada uma
-    empresaInfo.split('\n').forEach((linha, i) => {
-      doc.text(linha, pageWidth / 2, 30 + (i * 5), { align: 'center' });
-    });
+        // Tabela de mercadorias
+        const tableData = venda.mercadorias.map((m, idx) => {
+          const qtd = venda.itensVenda[idx]?.quantidade || 0;
+          const valor = venda.itensVenda[idx]?.valor_uni || 0;
+          return [m.nome, qtd.toString(), valor.toFixed(2), (qtd * valor).toFixed(2)];
+        });
     
-    // Título do relatório (com mais destaque)
-    doc.setFontSize(14);
-    doc.text(`Relatório de Vendas - Facturas- ${mesSelecionado} `, pageWidth / 2, 50, { align: 'center' });
-    doc.setTextColor(100);
-  
-    // Tabela com autoTable
-    autoTable(doc, {
-      startY: 60,
-      head: [["Factura Nº", "Data", "Cliente", "Quant.", "Preço Unit.", "Total", "Mercadorias", "Status"]],
-      body: tableData,
-      styles: { fontSize: 9 }
-    });
-  
-    doc.save("facturas_vendas.pdf");
-  };
+        autoTable(doc, {
+          startY: startY + 34,
+          margin: { left: startX },
+          head: [["DESCRIÇÃO", "QTD", "P.UNIT", "TOTAL"]],
+          body: tableData,
+          styles: { fontSize: 8 },
+          theme: "grid",
+          tableWidth: larguraFatura,
+          showHead: "firstPage",
+        });
+    
+        const totalGeral = tableData.reduce((acc, row) => acc + parseFloat(row[3]), 0);
+        const posTotal = doc.lastAutoTable.finalY + 2;
+        doc.text(`Sub-Total: ${totalGeral.toFixed(2)} MZN`, startX, posTotal);
+        doc.text(`IVA (Isento): 0.00 MZN`, startX, posTotal + 4);
+        doc.text(`Total: ${totalGeral.toFixed(2)} MZN`, startX, posTotal + 8);
+        doc.text(`Status: ${venda.status_p}`, startX, posTotal + 12);
+    
+        doc.setFontSize(7);
+        doc.text("Documento processado por computador", startX + larguraFatura / 2, posTotal + 18, { align: "center" });
+        doc.text("Obrigado pela preferência!", startX + larguraFatura / 2, posTotal + 22, { align: "center" });
+    
+        // Nova página a cada 4 faturas
+        if (indexNaPagina === 3 && i !== vendasFiltradas.length - 1) {
+          doc.addPage();
+        }
+      }
+    
+      doc.save("faturas_VD_2x2.pdf");
+    };
+    
 
-  function imprimirFatura(id,cliente,data,mercadoria,quantidade,status_p){
-    const faturaWindow = window.open("", "_blank");
-    // body {
-          //   width: 58mm;
-          //   font-family: monospace;
-          //   font-size: 10px;
-          //   padding: 0;
-          //   margin: 0;
-          // }
-  const logoBase64=`/logo_white-removebg2.png`
+  // body {
+        //   width: 58mm;
+        //   font-family: monospace;
+        //   font-size: 10px;
+        //   padding: 0;
+        //   margin: 0;
+        // }
+const logoBase64=`/logo_lifemar2.png`
+async function imprimirFatura(id, cliente, data, mercadoria, quantidade, status_p) {
+  const carregarImagem = (src) =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+
+  const logoBase64 = await carregarImagem("/logo_lifemar2.png");
+
+  const faturaWindow = window.open("", "_blank");
+
+  const totalGeral = mercadoria.reduce((soma, _, i) => {
+    const qtd = Number(quantidade[i]?.quantidade || 0);
+    const valor = Number(quantidade[i]?.valor_uni || 0);
+    return soma + qtd * valor;
+  }, 0);
+
+  const numeroFatura = String(id).padStart(5, "0"); // Ex: VD00001
+
   faturaWindow.document.write(`
     <html>
       <head>
-        <title>Recibo</title>
+        <title>VD${numeroFatura} </title>
         <style>
-       
-          .container {
-            padding: 5px;
-            width: 100%;
-            text-align: center;
-          }
-          .linha {
-            border-top: 1px dashed #000;
-            margin: 5px 0;
-          }
-          .tabela {
-            width: 100%;
-            text-align: left;
-          }
-          .tabela td {
-            padding: 2px 0;
-          }
-          .right {
-            text-align: right;
-          }
-        </style>
+                body {
+                  width: 58mm;
+                  font-family: monospace;
+                  font-size: 10px;
+                  margin: 0;
+                  padding: 0;
+                  color: #000;
+                }
+                .container {
+                  text-align: center;
+                  padding: 5px;
+                }
+                img { width: 60px; margin-bottom: 3px; }
+                h3 { font-size: 12px; margin: 0; }
+                p { margin: 2px 0; }
+                .linha {
+                  border-top: 1px dashed #000;
+                  margin: 5px 0;
+                }
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 9px;
+                }
+                th, td {
+                  text-align: left;
+                  padding: 2px 0;
+                }
+                th { border-bottom: 1px dashed #000; }
+                td.right, th.right { text-align: right; }
+                .totais {
+                  margin-top: 5px;
+                  text-align: right;
+                }
+                .footer {
+                  text-align: center;
+                  font-size: 9px;
+                  margin-top: 10px;
+                }
+              </style>
       </head>
       <body>
         <div class="container">
-          <img src="" alt="LifeMAr Logo" width="80px" />
-          <h3>LifeMar</h3>
-          <p>Bairo Nove, Distrito de Zavala</p>
-           <p>+258 84 2446503</p>
-           <p>NUIT: 401 232 125</p>
+          <img src="${logoBase64}" alt="LifeMar Logo" />
+          <h3><strong>LifeMar</strong></h3>
+          <p>Bairro Nove, Distrito de Zavala</p>
+          <p>+258 82 244 6503</p>
+          <p>NUIT: 401 232 125</p>
           <div class="linha"></div>
-          <p><strong>Factura Nº: </strong>${id}</p>
-          <p><strong>Cliente:</strong> ${cliente}</p>
+          <h4><strong>VENDA A DINHEIRO</strong></h4>
+          <p><strong>Fatura Nº:</strong> VD${numeroFatura}</p>
           <p><strong>Data:</strong> ${data}</p>
+          <p><strong>Cliente:</strong> ${cliente}</p>
           <div class="linha"></div>
           <table class="tabela">
-            ${mercadoria.map((id, index) => {
-              const nome = mercadoria ? id.nome : `#${id}`;
-              const qtd = Number(quantidade.map(e=>e.quantidade)?.[index] || 0);
-              const valor = Number(quantidade.map(e=>e.valor_uni)?.[index] || 0);
-              const total = qtd * valor;
-
-              return `
-                <tr>
-                  <td colspan="2">${nome}</td>
-                </tr>
-                <tr>
-                  <td>${qtd} x ${valor.toFixed(2)}</td>
-                  <td class="right">${total.toFixed(2)} MZN</td>
-                </tr>
-              `;
-            }).join("")}
+            <thead>
+              <tr class="center">
+                <th>Descrição</th>
+                <th>Qtd</th>
+                <th>Preço</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${mercadoria.map((item, i) => {
+                const qtd = Number(quantidade[i]?.quantidade || 0);
+                const valor = Number(quantidade[i]?.valor_uni || 0);
+                const total = qtd * valor;
+                return `
+                  <tr>
+                    <td>${item.nome}</td>
+                    <td class="center">${qtd}</td>
+                    <td class="right">${valor.toFixed(2)}</td>
+                    <td class="right">${total.toFixed(2)}</td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
           </table>
           <div class="linha"></div>
-          <p class="right"><strong>IVA ISENTO   Total: ${
-            mercadoria.reduce((soma, _, i) => {
-              const qtd = Number(quantidade.map(e=>e.quantidade)?.[i] || 0);
-              const valor = Number(quantidade.map(e=>e.valor_uni)?.[i] || 0);
-              return soma + (qtd * valor);
-            }, 0).toFixed(2)
-          } MZN</strong></p>
-          <p><strong>Status:</strong> ${status_p}</p>
+          <table class="tabela">
+            <tr>
+              <td colspan="3"><strong>Subtotal</strong></td>
+              <td class="right">${totalGeral.toFixed(2)}</td>
+            </tr>
+            <tr>
+              <td colspan="3"><strong>IVA (Isento Art.º 9 CIVA)</strong></td>
+              <td class="right">0.00</td>
+            </tr>
+            <tr class="total">
+              <td colspan="3"><strong>Total Geral (MT)</strong></td>
+              <td class="right">${totalGeral.toFixed(2)}</td>
+            </tr>
+          </table>
           <div class="linha"></div>
-          <p>Obrigado pela compra!</p>
+          <p><strong>Status:</strong> ${status_p}</p>
+          <div class="footer">
+            <p>Documento processado por computador</p>
+            <p>Isento de IVA ao abrigo do Art.º 9 do CIVA</p>
+            <p>Obrigado pela sua preferência!</p>
+          </div>
         </div>
       </body>
     </html>
   `);
 
-  }
-  
- 
+  faturaWindow.document.close();
+  faturaWindow.onload = () => faturaWindow.print();
+}
+
   
   return (
     <>
