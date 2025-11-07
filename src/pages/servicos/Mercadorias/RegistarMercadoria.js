@@ -12,6 +12,8 @@ import Mercadoria from "./Mercadoria";
 import repositorioMercadoria from "./Repositorio";
 import stock from "../Stock.js/Stock";
 import Loading from "../../../components/loading";
+import { Link } from "lucide-react";
+import { HiArrowSmRight } from "react-icons/hi";
 
 
 export default function RegistarMercadoria() {
@@ -126,6 +128,10 @@ export default function RegistarMercadoria() {
       <Conteinner>
         <Slider />
         <Content>
+        <Link className="go_link" to="/mercadoriaview">Lista
+        <HiArrowSmRight className="go" /> 
+
+          </Link>
           <div className="Cadastro">
             <h1>Registo  de Mercadorias</h1>
             <br />
