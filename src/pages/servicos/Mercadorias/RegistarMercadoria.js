@@ -11,6 +11,7 @@ import repositorioStock from "../Stock.js/Repositorio";
 import Mercadoria from "./Mercadoria";
 import repositorioMercadoria from "./Repositorio";
 import stock from "../Stock.js/Stock";
+import Loading from "../../../components/loading";
 
 
 export default function RegistarMercadoria() {
@@ -30,6 +31,7 @@ export default function RegistarMercadoria() {
   let repositorio = new repositorioMercadoria();
   const usuario= sessionStorage.getItem("idusuarios");
   const estoqueRepo = new repositorioStock();
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     // msg =;
   
@@ -80,30 +82,37 @@ export default function RegistarMercadoria() {
         window.location.reload();
       }, 2000);
     } else {
-      if (
-        !inputs.nome ||
-    
-        !inputs.quantidade ||
-        !inputs.dataEntrada ||
-        !inputs.valorUnitario ||
-        !inputs.estoque
-      ) {
-        msg.Erro("Preencha corretamente todos os campos obrigatórios");
-      } else {
-             if(calculaQuantidadeStock()>0){
-              await repositorio.cadastrar(criaMercadoria());
-              await  estoqueRepo.editar(inputs.estoque,new stock(0,calculaQuantidadeStock(),"","","",0))
-              localStorage.setItem("quantidade",JSON.stringify(quantidade))
-              msg.sucesso("Mercadoria cadastrada com sucesso.");
-              limparFormulario(); // Limpa o formulário após cadastrar
-              setTimeout(() => {
-                window.location.reload();
-              }, 2000);
-             }
-             else{
-              msg.Erro("Stock Insuficiente")
-             }
-      }
+       try{
+        setLoading(true)
+          if (
+            !inputs.nome ||
+        
+            !inputs.quantidade ||
+            !inputs.dataEntrada ||
+            !inputs.valorUnitario ||
+            !inputs.estoque
+          ) {
+            msg.Erro("Preencha corretamente todos os campos obrigatórios");
+          } else {
+                if(calculaQuantidadeStock()>0){
+                  await repositorio.cadastrar(criaMercadoria());
+                  await  estoqueRepo.editar(inputs.estoque,new stock(0,calculaQuantidadeStock(),"","","",0))
+                  localStorage.setItem("quantidade",JSON.stringify(quantidade))
+                  msg.sucesso("Mercadoria cadastrada com sucesso.");
+                  limparFormulario(); // Limpa o formulário após cadastrar
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 2000);
+                }
+                else{
+                  msg.Erro("Stock Insuficiente")
+                }
+          }
+       }catch{
+         console.log("erro")
+       }finally{
+        setLoading(false)
+       }
     }
   };
   
@@ -111,6 +120,8 @@ export default function RegistarMercadoria() {
 
   return (
     <>
+    
+    {loading && <Loading />}
       <Header />
       <Conteinner>
         <Slider />

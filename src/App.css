@@ -164,6 +164,9 @@ input.pesquisa{
       right: 20px !important;
       display: none !important;
   }
+  .hamburger-menu{
+    display: block;
+  }
   
 }
 @media (max-width: 480px) {

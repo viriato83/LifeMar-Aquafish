@@ -605,7 +605,7 @@ export default function Dashboard() {
               color="#ffa726"
             />
             <KpiCard
-              title="Total Entradas"
+              title="Total Entradas no Stock"
               value={`${formatNumber(entrada || 0)} `}
               icon={<List />}
               color="#42a5f5"

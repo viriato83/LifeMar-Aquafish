@@ -15,6 +15,7 @@ import vendas from "./Vendas";
 import repositorioMercadoria from "../Mercadorias/Repositorio";
 import ClienteRepository from "../Clientes/ClienteRepository";
 import mercadoria from "../Mercadorias/Mercadoria";
+import Loading from "../../../components/loading";
 export default function RegistarVenda() {
   const [inputs, setInputs] = useState({
     quantidade: [],
@@ -38,6 +39,7 @@ export default function RegistarVenda() {
   let Cadastro =true; //
   let saidas=0;
   let [status,setStaus]=useState(0)
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     // atualizacao 2025
     // Buscar clientes e mercadorias do backend
@@ -51,7 +53,7 @@ export default function RegistarVenda() {
           }
       })
     };
-    console.log(mercadoria)
+
 
 
 
@@ -336,7 +338,8 @@ const cadastrar = async () => {
   }
 
   try {
-    if (inputs.cliente !== status) {
+    setLoading(true)
+    if (inputs.cliente!== status) {
       await repositorio.cadastrar(criaVenda());
    
       // Atualizar mercadorias - espera arrays para mercadorias e quantidades
@@ -376,6 +379,8 @@ const cadastrar = async () => {
   } catch (error) {
     msg.Erro("Erro ao cadastrar venda.");
     console.log(error)
+  }finally{
+    setLoading(false)
   }
 };
 
@@ -402,6 +407,7 @@ console.log(mercadorias)
 
   return (
     <>
+         {loading && <Loading />} 
       <Header />
       <Conteinner>
         <Slider />
