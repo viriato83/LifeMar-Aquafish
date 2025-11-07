@@ -94,7 +94,7 @@ export default function RegistarMercadoria() {
           ) {
             msg.Erro("Preencha corretamente todos os campos obrigatórios");
           } else {
-                if(calculaQuantidadeStock()>0){
+                if(calculaQuantidadeStock()>=0){
                   await repositorio.cadastrar(criaMercadoria());
                   await  estoqueRepo.editar(inputs.estoque,new stock(0,calculaQuantidadeStock(),"","","",0))
                   localStorage.setItem("quantidade",JSON.stringify(quantidade))

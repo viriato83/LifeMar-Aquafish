@@ -18,6 +18,8 @@ export default function StockView() {
   const [id, setId] = useState(""); // State for the entered ID
   const navigate = useNavigate();
    const permissao= sessionStorage.getItem("cargo")
+   const [totalQuantidade, setTotalQuantidade] = useState(0);
+   const [totalEstoque, setTotalEstoque] = useState(0);
   const [loading, setLoading] = useState(false); // Loading state
   let moda = new Modal();
   let msg = new mensagem();
@@ -30,6 +32,17 @@ export default function StockView() {
         const dadosTotal = await repositorio.total();
         setModelo(dadosModelo);
         setTotal(dadosTotal);
+        const somaQuantidade = dadosModelo.reduce(
+          (soma, item) => soma + Number(item.quantidade || 0),
+          0
+        );
+
+        const somaQuantidadeEstoque = dadosModelo.reduce(
+          (soma, item) => soma + Number(item.quantidade_estoque || 0),
+          0
+        );
+        setTotalQuantidade(somaQuantidade);
+        setTotalEstoque(somaQuantidadeEstoque);
       } catch (erro) {
         console.error("Erro ao carregar dados:", erro);
       } finally {
@@ -38,6 +51,26 @@ export default function StockView() {
     }
     carregarDados();
   }, []);
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
+  const [pesquisa, setPesquisa] = useState("");
+  // Filtrar por nome da mercadoria
+  const listaFiltrada = modelo.filter((item) => {
+    const passarFiltroTipo =
+      pesquisa.trim() === ""
+        ? true
+        : item.tipo.toLowerCase().includes(pesquisa.toLowerCase());
+  
+    const dataItem = new Date(item.data);
+    const inicio = dataInicio ? new Date(dataInicio) : null;
+    const fim = dataFim ? new Date(dataFim) : null;
+  
+    const passarFiltroData =
+      (!inicio || dataItem >= inicio) && (!fim || dataItem <= fim);
+  
+    return passarFiltroTipo && passarFiltroData;
+  });
+  
 
   // Function to export data to Excel
   const exportToExcel = () => {
@@ -47,6 +80,7 @@ export default function StockView() {
         ID: item.idstock,
         Quantidade: item.quantidade,
         Tipo: item.tipo,
+        Data:item.data,
         Mercadorias: item.mercadorias.map((merc) => `${merc.idmercadoria} : ${merc.nome}`).join(", "),
         Total: item.total, // Assuming `item.total` exists in your data
       }))
@@ -67,6 +101,42 @@ export default function StockView() {
         <Slider />
         <Content>
         <h2 >Stock </h2>
+        <div style={{ display: "flex", gap: "10px", margin: "10px 0" }}>
+  <input
+    type="date"
+    value={dataInicio}
+    onChange={(e) => setDataInicio(e.target.value)}
+    className="data-input"
+  />
+
+  <input
+    type="date"
+    value={dataFim}
+    onChange={(e) => setDataFim(e.target.value)}
+    className="data-input"
+  />
+
+  <button
+    onClick={() => {
+      setDataInicio("");
+      setDataFim("");
+      setPesquisa("");
+    }}
+    className="btn border-black border-2"
+  >
+    Limpar Filtros
+  </button>
+</div>
+ {/* CAMPO DE PESQUISA */}
+ <input
+            type="text"
+            placeholder="Pesquisar por nome da mercadoria..."
+            value={pesquisa}
+            onChange={(e) => setPesquisa(e.target.value)}
+            className="pesquisa-input"
+          />
+
+
           <div className="tabela">
             <table>
               <thead>
@@ -83,7 +153,7 @@ export default function StockView() {
                 </tr>
               </thead>
               <tbody>
-                {modelo.map((elemento, i) => (
+                {listaFiltrada.length > 0 ? listaFiltrada.map((elemento, i) => (
                   <tr key={i}>
                     <td>{elemento.idstock}</td>
                     <td>{elemento.quantidade} </td>
@@ -96,12 +166,21 @@ export default function StockView() {
                    
                    
                   </tr>
-                ))}
+                )): (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: "center", padding: "10px" }}>
+                      Nenhum dado encontrado...
+                    </td>
+                  </tr>
+                )}
               </tbody>
               <tfoot>
-                <tr>
-                  <td colSpan="2">Total</td>
-                  <td>{total}</td>
+              <tr>
+                  <td colSpan="1">Total Quantidade Stock</td>
+                  <td>{totalEstoque.toFixed(2)}</td>
+                  <td colSpan="1">Total Quantidade Dispo</td>
+                  <td>{totalQuantidade.toFixed(2)}</td>
+                  <td colSpan="2"></td>
                 </tr>
               </tfoot>
             </table>
