@@ -612,7 +612,7 @@ export default function Dashboard() {
             />
             <KpiCard
               title="Total Saídas"
-              value={`${saida} `}
+              value={`${Number(total)+Number(totalDivida)} `}
               icon={<DollarSign />}
               color="#7e57c2"
             />

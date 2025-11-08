@@ -900,7 +900,7 @@ canvas {
     width: 100%;
     /* max-width: 450px; */
     margin: 20px 0;
-    margin-left: 300px;
+    margin-left:auto;
     
     
 
