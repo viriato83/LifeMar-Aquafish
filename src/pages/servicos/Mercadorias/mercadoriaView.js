@@ -31,6 +31,7 @@ const permissao= sessionStorage.getItem("cargo");
   const [quantidadeEst, setQuantidadeEst] = useState(0);
   const repoStco= new repositorioStock();
   const [termoPesquisa, setTermoPesquisa] = useState("");
+  const [valorDisponivel, setValorDisponivel] = useState(0);
 
   useEffect(() => {
     // Inicializa as instâncias uma vez
@@ -38,39 +39,39 @@ const permissao= sessionStorage.getItem("cargo");
     moda.current = new Modal();
 
     async function carregarDados() {
-      setLoading(true); // Exibir loading
+      setLoading(true);
       try {
         const repoStck = await repoStco.leitura();
         const dadosModelo = await repositorio.leitura();
-        const dadosVendas= await repositoriovenda.leitura();
-       let valorTotalVendas=0;
-       let  quantidadeTotal=0;
-       let  quantidadeEst=0;
-        dadosModelo.forEach((e) => {
+        const dadosVendas = await repositoriovenda.leitura();
     
-                if (!stockSelecionado|| (stockSelecionado && stockSelecionado == e.stock.idstock)) {
-                  quantidadeEst+=e.quantidade_est;
-                  quantidadeTotal += e.quantidade;
-                  valorTotalVendas += e.valor_total;
-                  }
-          
-            
-
+        let valorTotalEntradas = 0;
+        let valorTotalDisponivel = 0;
+        let quantidadeTotal = 0;
+        let quantidadeEst = 0;
+    
+        dadosModelo.forEach((e) => {
+          if (!stockSelecionado || stockSelecionado == e.stock.idstock) {
+            quantidadeEst += e.quantidade_est; // disponível
+            quantidadeTotal += e.quantidade; // total entrada
+            valorTotalEntradas += e.valor_total; // valor total entrada
+            valorTotalDisponivel += e.valor_un * e.quantidade_est; // valor total disponível
+          }
         });
-       
-        const quantidadeTotalVendas = dadosModelo.reduce((acc, merc) => 
-          acc + merc.valor_total, 0);
-        setQuantidadeEst(quantidadeEst)
-        setModelo(dadosModelo);
+    
+        setQuantidadeEst(quantidadeEst);
         setTotal(quantidadeTotal);
-        setQuantidadeTotal(valorTotalVendas);
-        setModelo2(repoStck)
+        setQuantidadeTotal(valorTotalEntradas); // total entrada
+        setValorDisponivel(valorTotalDisponivel); // total disponível
+        setModelo(dadosModelo);
+        setModelo2(repoStck);
       } catch (erro) {
         console.error("Erro ao carregar dados:", erro);
       } finally {
-        setLoading(false); // Esconder loading
+        setLoading(false);
       }
     }
+    
     carregarDados();
   }, [stockSelecionado]);
 
@@ -81,31 +82,47 @@ const permissao= sessionStorage.getItem("cargo");
       Nome: elemento.nome,
       Tipo: elemento.tipo,
       Quantidade: elemento.quantidade,
+      "Quantidade Disponível": elemento.quantidade_est,
       "Data de Entrada": elemento.data_entrada,
       "Valor Unitário": `${elemento.valor_un} Mt`,
-      "Valor Total": elemento.valor_total.toLocaleString("pt-PT", { minimumFractionDigits: 3 }) + " Mt",
-      "Q Saídas": elemento.q_saidas,
+      "Valor Total": elemento.valor_total.toLocaleString("pt-PT", { minimumFractionDigits: 2 }) + " Mt",
       "Data de Saída": elemento.data_saida,
     }));
-
-    dados.push({
-      ID: "TOTAL",
-      Nome: "",
-      Tipo: "",
-      Quantidade: total,
-      "Data de Entrada": "",
-      "Valor Unitário": "",
-      "Valor Total": quantidadeTotal.toLocaleString("pt-PT", { minimumFractionDigits: 3 }) + " Mt",
-      "Q Saídas": "",
-      "Data de Saída": "",
-    });
-
+  
+    // Adiciona linha de resumo ao final
+    dados.push(
+      {
+        ID: "",
+        Nome: "",
+        Tipo: "",
+        Quantidade: "",
+        "Quantidade Disponível": "",
+        "Data de Entrada": "",
+        "Valor Unitário": "",
+        "Valor Total": "",
+        "Data de Saída": "",
+      },
+      {
+        ID: "Resumo:",
+        Nome: "",
+        Tipo: "",
+        Quantidade: `${total.toFixed(2)} Entradas`,
+        "Quantidade Disponível": `${quantidadeEst.toFixed(2)} em Stock`,
+        "Data de Entrada": "",
+        "Valor Unitário": "",
+        "Valor Total":
+          `${valorDisponivel.toLocaleString("pt-PT", { minimumFractionDigits: 2 })} Mt (Disponível) / ` +
+          `${quantidadeTotal.toLocaleString("pt-PT", { minimumFractionDigits: 2 })} Mt (Entradas)`,
+        "Data de Saída": "",
+      }
+    );
+  
     const ws = XLSX.utils.json_to_sheet(dados);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Mercadorias");
     XLSX.writeFile(wb, "mercadorias.xlsx");
   };
-
+  
   return (
     <>
       {loading && <Loading />}
@@ -198,13 +215,20 @@ const permissao= sessionStorage.getItem("cargo");
 
               </tbody>
               <tfoot>
-                <tr>
-                  <td colSpan="4">Total</td>
-                  <td>{quantidadeEst.toFixed(2)}  </td>
+                    <tr>
+                      <td colSpan="4">Totais</td>
+                      <td>{quantidadeEst.toFixed(2)} em Stock</td>
+                      <td>{total.toFixed(2)} Entradas</td>
+                      <td>
+                        {valorDisponivel.toLocaleString("pt-PT", { minimumFractionDigits: 2 })} Mt (Disponível)
+                      </td>
+                      <td>
+                        {quantidadeTotal.toLocaleString("pt-PT", { minimumFractionDigits: 2 })} Mt (Entradas)
+                      </td>
+                    </tr>
+                  </tfoot>
 
-                  <td>{total.toFixed(2)}   Disponiveis</td>
-                </tr>
-              </tfoot>
+
             </table>
             {(permissao === "admin" || permissao === "gerente") && ( 
             <div className="crud">
