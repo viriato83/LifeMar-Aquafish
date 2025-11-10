@@ -98,7 +98,8 @@ export default function Dashboard() {
         vendasT.forEach((v) => {
           const dv = new Date(v.data);
           const anoMes = `${dv.getFullYear()}-${String(dv.getMonth() + 1).padStart(2, "0")}`;
-
+          let saidasQtd = 0;
+          
           // respeita filtros
           const passaMes = !mesSelecionado || anoMes === mesSelecionado;
           const passaStock =
@@ -110,9 +111,10 @@ export default function Dashboard() {
           if (passaMes && passaStock) {
             // contar quantidade vendida por itensVenda
             const qtd = Array.isArray(v.itensVenda)
-              ? v.itensVenda.reduce((acc, it) => acc + Number(it.quantidade || 0), 0)
-              : Number(v.quantidade || 0);
-
+            ? v.itensVenda.reduce((acc, it) => acc + Number(it.quantidade || 0), 0)
+            : Number(v.quantidade || 0);
+            
+            setSaida(Number(qtd.toFixed(2)));
             if (v.status_p === "Em_Divida") {
               dividaQtd += qtd;
             } else {
@@ -126,7 +128,6 @@ export default function Dashboard() {
 
         // métricas mercadorias (entradas/saídas e total mercadorias)
         let entradasQtd = 0;
-        let saidasQtd = 0;
         let totalMercadorias = 0;
 
         mercT.forEach((m) => {
@@ -142,13 +143,13 @@ export default function Dashboard() {
           if (passaMes && passaStock) {
             entradasQtd += Number(m.quantidade_est || 0);
             // assumindo “saídas” = quantidade vendida daquela mercadoria (se tiveres campo próprio, ajusta aqui)
-            saidasQtd += Number(m.quantidade || 0);
+           
             totalMercadorias += 1;
           }
         });
 
         setEntradada(Number(entradasQtd.toFixed(2)));
-        setSaida(Number(saidasQtd.toFixed(2)));
+     
         setTotalMerc(totalMercadorias);
 
         // cards (ordem antiga): clientes, total mercadorias, vendas pagas (qtd), vendas em dívida (qtd)
@@ -688,71 +689,49 @@ export default function Dashboard() {
 
       {/* estilos mínimos (ajusta conforme teu CSS/Tailwind) */}
       <style>{`
-        .cards-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-        .kpi-card {
-          display: flex;
-          gap: 12px;
-          align-items: center;
-          padding: 12px;
-          border-radius: 10px;
-          background: #fff;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
-        .kpi-icon {
-          width: 42px;
-          height: 42px;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          border-radius:10px;
-          color: #fff;
-        }
-        .kpi-text h3 {
-          margin: 0 0 4px 0;
-          font-size: 14px;
-          color: #555;
-        }
-        .kpi-text p {
-          margin: 0;
-          font-size: 18px;
-          font-weight: 700;
-        }
         .charts-row {
-          display: grid;
-          grid-template-columns: 2fr 2fr;
-          gap: 12px;
-          margin-bottom: 16px;
-        }
-        .chart-card {
-          background: #fff;
-          border-radius: 10px;
-          padding: 12px;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
-        .small-cards {
-          grid-column: 1 / -1;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 12px;
-        }
-        .chart-card.small {
-          min-height: 280px;
-        }
-        .ranking-list {
-          margin: 8px 0 0 14px;
-        }
-        .table-card {
-          background: #fff;
-          border-radius: 10px;
-          padding: 12px;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-          margin-bottom: 16px;
-        }
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+@media (min-width: 1100px) {
+  .charts-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.chart-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  min-height: 420px; /* altura confortável */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.chart-card h4 {
+  text-align: center;
+  font-size: 1.05rem;
+  color: #333;
+  margin-bottom: 18px;
+}
+.chart-card canvas {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1;
+}
+
+/* Corrige layout do gráfico de pizza */
+.chart-card.small canvas {
+  width: 100% !important;
+  height: 320px !important;
+  max-height: 340px !important;
+  margin: auto;
+  display: block;
+}
+
       `}</style>
     </>
   );
