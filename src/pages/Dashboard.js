@@ -14,7 +14,7 @@ import Loading from "../components/loading";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { TrendingDown, TrendingUp, Users, Box, DollarSign, List } from "lucide-react";
-
+import "./Dashboard.css"
 /* =========================================================================
    DASHBOARD COMPLETO
    - KPIs (clientes, vendas pagas, em dívida, mercadorias, entradas, saídas)
@@ -217,14 +217,69 @@ export default function Dashboard() {
       },
       options: {
         responsive: true,
-        plugins: { legend: { position: "top" } },
-        scales: {
-          x: { ticks: { maxTicksLimit: 12 } },
-          y: {
-            beginAtZero: true,
-            ticks: { callback: (value) => `${value} Mt` },
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect: false },
+        plugins: {
+          legend: {
+            position: "top",
+            labels: {
+              color: "#334155", // cinza-escuro suave
+              font: { size: 11, family: "Inter, sans-serif" },
+              boxWidth: 14,
+              boxHeight: 10,
+            },
+          },
+          tooltip: {
+            backgroundColor: "rgba(0,0,0,0.8)",
+            titleFont: { size: 11, family: "Inter, sans-serif" },
+            bodyFont: { size: 11, family: "Inter, sans-serif" },
+            padding: 8,
+            cornerRadius: 6,
+            displayColors: false,
           },
         },
+        scales: {
+          x: {
+            ticks: {
+              color: "#475569",
+              font: { size: 10, family: "Inter, sans-serif" },
+              maxRotation: 30,
+              minRotation: 0,
+            },
+            grid: {
+              display: false,
+            },
+            title: {
+              display: true,
+              text: "Período (Mês/Ano)",
+              color: "#1e293b",
+              font: { size: 11, weight: "600", family: "Inter, sans-serif" },
+            },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: "#475569",
+              font: { size: 10, family: "Inter, sans-serif" },
+              callback: (v) => `${v} Mt`,
+            },
+            title: {
+              display: true,
+              text: "Vendas (MT)",
+              color: "#1e293b",
+              font: { size: 11, weight: "600", family: "Inter, sans-serif" },
+            },
+            grid: {
+              color: "rgba(0,0,0,0.05)",
+              drawBorder: false,
+            },
+          },
+        },
+        layout: {
+          padding: 12,
+        },
+      
+      
       },
     });
   }, [useVenda, useData]);
@@ -301,21 +356,74 @@ export default function Dashboard() {
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                color: "#334155", // cinza-escuro elegante
+                font: { size: 11, family: "Inter, sans-serif" },
+                boxWidth: 14,
+                boxHeight: 10,
+              },
+            },
+            tooltip: {
+              backgroundColor: "rgba(0,0,0,0.8)",
+              titleFont: { size: 11, family: "Inter, sans-serif" },
+              bodyFont: { size: 11, family: "Inter, sans-serif" },
+              padding: 8,
+              cornerRadius: 6,
+            },
+          },
           scales: {
+            x: {
+              ticks: {
+                color: "#475569",
+                font: { size: 10, family: "Inter, sans-serif" },
+                maxRotation: 30,
+                minRotation: 0,
+              },
+              grid: { display: false },
+            },
             y: {
               beginAtZero: true,
               position: "left",
-              title: { display: true, text: "Vendas (MT)" },
+              ticks: {
+                color: "#475569",
+                font: { size: 10, family: "Inter, sans-serif" },
+                callback: (v) => `${v} MT`,
+              },
+              title: {
+                display: true,
+                text: "Vendas (MT)",
+                color: "#1e293b",
+                font: { size: 11, family: "Inter, sans-serif", weight: "600" },
+              },
+              grid: { color: "rgba(0,0,0,0.05)" },
             },
             y1: {
               beginAtZero: true,
               position: "right",
+              ticks: {
+                color: "#475569",
+                font: { size: 10, family: "Inter, sans-serif" },
+                callback: (v) => `${v} Qtd`,
+              },
+              title: {
+                display: true,
+                text: "Entradas (Qtd)",
+                color: "#1e293b",
+                font: { size: 11, family: "Inter, sans-serif", weight: "600" },
+              },
               grid: { drawOnChartArea: false },
-              title: { display: true, text: "Entradas (Qtd)" },
             },
           },
-        },
+          layout: {
+            padding: 12,
+          },
+        }
+        
       });
     }
     montarGraficoCombinado();
@@ -579,6 +687,7 @@ export default function Dashboard() {
   return (
     <>
       <Header />
+      
       <Conteinner>
         <Sidebar />
         <Content>
@@ -691,7 +800,7 @@ export default function Dashboard() {
       <style>{`
         .charts-row {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 3fr;
   gap: 24px;
   margin-top: 20px;
   margin-bottom: 20px;
@@ -701,27 +810,7 @@ export default function Dashboard() {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-.chart-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  min-height: 420px; /* altura confortável */
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.chart-card h4 {
-  text-align: center;
-  font-size: 1.05rem;
-  color: #333;
-  margin-bottom: 18px;
-}
-.chart-card canvas {
-  width: 100% !important;
-  height: 100% !important;
-  flex: 1;
-}
+
 
 /* Corrige layout do gráfico de pizza */
 .chart-card.small canvas {

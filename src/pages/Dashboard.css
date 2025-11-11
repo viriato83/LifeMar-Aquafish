@@ -1,0 +1,269 @@
+/* ================================================================
+   DASHBOARD PREMIUM v2.0 - AQUAFISH ENTERPRISE EDITION
+   ================================================================ */
+
+   :root {
+    --bg: #f4f6f8;
+    --card-bg: #ffffff;
+    --border: #e0e6ed;
+    --text: #1e293b;
+    --muted: #64748b;
+    --primary: #004b75;
+    --primary-light: #007ac1;
+    --accent: #00aaff;
+    --success: #1b5e20;
+    --danger: #b91c1c;
+    --radius: 14px;
+    --shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+    --transition: all 0.3s ease;
+  }
+  
+  /* ======= CONTEÚDO ======= */
+  .content {
+    background: var(--bg);
+    padding: 30px;
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", sans-serif;
+  }
+  
+  /* ======= FILTROS ======= */
+  .filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    padding: 22px 26px;
+    margin-bottom: 32px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  
+  .filters-bar label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: block;
+  }
+  
+  .filters-bar select,
+  .filters-bar input[type="month"] {
+    width: 230px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    outline: none;
+    background: #fff;
+    transition: var(--transition);
+  }
+  .filters-bar select:focus,
+  .filters-bar input:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(0, 115, 185, 0.15);
+  }
+  
+  .filters-bar button {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+  }
+  .filters-bar button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+  
+  /* ======= KPI CARDS ======= */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+    margin-bottom: 36px;
+  }
+  
+  @media (min-width: 1280px) {
+    .cards-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 1600px) {
+    .cards-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  .kpi-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    transition: var(--transition);
+  }
+  
+  .kpi-card:hover {
+    transform: translateY(-4px);
+  }
+  
+  .kpi-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary-light), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  
+  .kpi-text h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0;
+  }
+  .kpi-text p {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 4px;
+    color: var(--text);
+  }
+  
+ 
+  /* ======= RANKING ======= */
+  .ranking-list {
+    margin-top: 8px;
+    list-style: none;
+    padding-left: 0;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .ranking-list li {
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .ranking-list strong {
+    color: var(--primary);
+  }
+  
+  /* ======= TABELAS ======= */
+  .table-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    margin-top: 26px;
+    overflow-x: auto;
+  }
+  
+  .table-card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  
+  /* ======= RESUMO FINANCEIRO ======= */
+  .finance-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+  }
+  
+  .finance-item {
+    background: #f9fafb;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: inset 0 0 0 1px #edf2f7;
+    transition: var(--transition);
+  }
+  .finance-item:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 0 0 1px var(--primary-light);
+  }
+  
+  .finance-item span {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .finance-item strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  
+  /* ======= CHARTJS FONTS & SPACING REFINEMENT ======= */
+
+.chart-card canvas {
+    width: 100% !important;
+    height: 270px !important; /* Altura mais proporcional */
+  }
+  
+  .chartjs-render-monitor {
+    font-size: 10px !important;
+  }
+  
+  canvas {
+    font-size: 10px !important;
+  }
+  
+  /* Reduz o tamanho das labels e títulos do Chart.js */
+  .chartjs-size-monitor,
+  .chartjs-tooltip {
+    font-size: 11px !important;
+  }
+  
+  /* Espaçamento interno mais equilibrado */
+  .chart-card {
+    padding: 18px 20px;
+  }
+  
+  /* Legendas e títulos menores e centralizados */
+  .chart-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  
+  /* Ajusta eixo X e Y visualmente */
+  .chart-card canvas {
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+  
+  /* ======= RESPONSIVIDADE ======= */
+  @media (max-width: 992px) {
+    .charts-row {
+      grid-template-columns: 1fr;
+    }
+    .cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 768px) {
+    .cards-grid {
+      grid-template-columns: 1fr;
+    }
+    .filters-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+  
