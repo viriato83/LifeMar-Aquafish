@@ -94,7 +94,7 @@ export default function Dashboard() {
         // métricas de vendas com filtros (pagas/divida em quantidade)
         let pagasQtd = 0;
         let dividaQtd = 0;
-
+        let Valor_saida=0
         vendasT.forEach((v) => {
           const dv = new Date(v.data);
           const anoMes = `${dv.getFullYear()}-${String(dv.getMonth() + 1).padStart(2, "0")}`;
@@ -110,11 +110,17 @@ export default function Dashboard() {
 
           if (passaMes && passaStock) {
             // contar quantidade vendida por itensVenda
-            const qtd = Array.isArray(v.itensVenda)
-            ? v.itensVenda.reduce((acc, it) => acc + Number(it.quantidade || 0), 0)
-            : Number(v.quantidade || 0);
+            const qtd = v.itensVenda.reduce(
+              (acc, it) => acc + (parseFloat(it.valor_tot) || 0),
+              0
+            );
+            v.itensVenda.forEach((e)=>{
+              Valor_saida+=e.quantidade
+            })
             
-            setSaida(Number(qtd.toFixed(2)));
+          
+             console.log(qtd) 
+            setSaida(Number(Valor_saida));
             if (v.status_p === "Em_Divida") {
               dividaQtd += qtd;
             } else {
@@ -539,7 +545,7 @@ export default function Dashboard() {
       0
     );
     const valorDisponivel = mercadoriasFiltradas.reduce(
-      (acc, m) => acc + Number(m.valor_un || 0) * Number(m.quantidade_est || 0),
+      (acc, m) => acc + Number(m.valor_un || 0) * Number(m.quantidade || 0),
       0
     );
     const valorVendas = vendasFiltradas.reduce(
@@ -555,133 +561,158 @@ export default function Dashboard() {
   }
 
   // EXPORTAR EXCEL (4 abas, filtrado)
-  function exportarParaExcel(dados, nomeArquivo = "dashboard_dados.xlsx") {
-    if (!dados) return;
+  // EXPORTAR EXCEL (4 abas, filtrado)
+function exportarParaExcel(nomeArquivo = "dashboard_dados.xlsx") {
+  // --- 1) Resumo_Básico montado com os ESTADOS atuais ---
+  const infoBasica = [
+    { label: "Total Clientes", valor: Number(cards[0] || 0) },
+    { label: "Total Mercadorias", valor: Number(cards[1] || 0) },
+    { label: "Vendas Pagas (Qtd)", valor: Number(cards[2] || 0) },
+    { label: "Vendas em Dívida (Qtd)", valor: Number(cards[3] || 0) },
+    { label: "Entradas (Qtd)", valor: Number(entrada || 0) },
+    { label: "Saídas (Qtd)", valor: Number(saida || 0) },
+  ];
 
-    // --- sheet 1: Resumo_Básico ---
-    const wsDados = XLSX.utils.json_to_sheet(dados.infoBasica || []);
+  const wsDados = XLSX.utils.json_to_sheet(infoBasica);
 
-    // --- filtrar Entradas (mercadorias) conforme filtros atuais ---
-    const mercadoriasFiltradas = (Dados2 || []).filter((m) => {
-      const d = new Date(m.data_entrada);
-      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      if (mesSelecionado && ym !== mesSelecionado) return false;
-      if (stockSelecionado && stockSelecionado !== 0 && m.stock && m.stock.idstock !== stockSelecionado) return false;
-      return true;
-    });
+  // --- 2) Entradas (mercadorias) filtradas pelos filtros atuais ---
+  const mercadoriasFiltradas = (Dados2 || []).filter((m) => {
+    const d = new Date(m.data_entrada);
+    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (mesSelecionado && ym !== mesSelecionado) return false;
+    if (stockSelecionado && stockSelecionado !== 0 && m.stock && m.stock.idstock !== stockSelecionado) {
+      return false;
+    }
+    return true;
+  });
 
-    const wsEntradas = XLSX.utils.json_to_sheet(
-      mercadoriasFiltradas.map((m) => ({
-        ID: m.idmercadoria,
-        Nome: m.nome,
-        Quantidade_Entrada: Number(m.quantidade_est || 0),
-        Quantidade_Disponivel: Number(m.quantidade || 0),
-        Valor_Unitario: Number(m.valor_un || 0),
-        Valor_Total_Entrada: Number(m.valor_total || 0),
-        Data_Entrada: m.data_entrada,
-        Stock: m.stock?.idstock ?? "",
-        Usuario: m.usuario == null ? "0" : m.usuario.login,
-      }))
-    );
+  const wsEntradas = XLSX.utils.json_to_sheet(
+    mercadoriasFiltradas.map((m) => ({
+      ID: m.idmercadoria,
+      Nome: m.nome,
+      Quantidade_Entrada: Number(m.quantidade_est || 0),
+      Quantidade_Disponivel: Number(m.quantidade || 0),
+      Valor_Unitario: Number(m.valor_un || 0),
+      Valor_Total_Entrada: Number(m.valor_total || 0),
+      Data_Entrada: m.data_entrada,
+      Stock: m.stock?.idstock ?? "",
+      Usuario: m.usuario == null ? "0" : m.usuario.login,
+    }))
+  );
 
-    const totQtdEntrada = mercadoriasFiltradas.reduce((a, m) => a + Number(m.quantidade_est || 0), 0);
-    const totQtdDisp = mercadoriasFiltradas.reduce((a, m) => a + Number(m.quantidade || 0), 0);
-    const totValorEntrada = mercadoriasFiltradas.reduce((a, m) => a + Number(m.valor_total || 0), 0);
-    const totValorDisp = mercadoriasFiltradas.reduce(
-      (a, m) => a + Number(m.valor_un || 0) * Number(m.quantidade_est || 0),
-      0
-    );
+  const totQtdEntrada = mercadoriasFiltradas.reduce(
+    (a, m) => a + Number(m.quantidade_est || 0),
+    0
+  );
+  const totQtdDisp = mercadoriasFiltradas.reduce(
+    (a, m) => a + Number(m.quantidade || 0),
+    0
+  );
+  const totValorEntrada = mercadoriasFiltradas.reduce(
+    (a, m) => a + Number(m.valor_total || 0),
+    0
+  );
+  const totValorDisp = mercadoriasFiltradas.reduce(
+    (a, m) => a + Number(m.valor_un || 0) * Number(m.quantidade_est || 0),
+    0
+  );
 
-    XLSX.utils.sheet_add_json(
-      wsEntradas,
-      [
-        {
-          ID: "TOTAL",
-          Quantidade_Entrada: totQtdEntrada,
-          Quantidade_Disponivel: totQtdDisp,
-          Valor_Total_Entrada: Number(totValorEntrada.toFixed(2)),
-          Valor_Total_Disponivel: Number(totValorDisp.toFixed(2)),
-        },
-      ],
-      { skipHeader: true, origin: -1 }
-    );
+  XLSX.utils.sheet_add_json(
+    wsEntradas,
+    [
+      {
+        ID: "TOTAL",
+        Quantidade_Entrada: totQtdEntrada,
+        Quantidade_Disponivel: totQtdDisp,
+        Valor_Total_Entrada: Number(totValorEntrada.toFixed(2)),
+        Valor_Total_Disponivel: Number(totValorDisp.toFixed(2)),
+      },
+    ],
+    { skipHeader: true, origin: -1 }
+  );
 
-    // --- filtrar Vendas conforme filtros atuais ---
-    const vendasFiltradas = (dados.grafico || []).filter((v) => {
-      const d = new Date(v.data);
-      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      if (mesSelecionado && ym !== mesSelecionado) return false;
+  // --- 3) Vendas filtradas (usa Dados3 em vez de dados.grafico) ---
+  const vendasFiltradas = (Dados3 || []).filter((v) => {
+    const d = new Date(v.data);
+    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (mesSelecionado && ym !== mesSelecionado) return false;
 
-      const passaStock =
-        !stockSelecionado ||
-        stockSelecionado === 0 ||
-        (Array.isArray(v.mercadorias) &&
-          v.mercadorias.some((m) => m.stock && m.stock.idstock === stockSelecionado));
-      return passaStock;
-    });
+    const passaStock =
+      !stockSelecionado ||
+      stockSelecionado === 0 ||
+      (Array.isArray(v.mercadorias) &&
+        v.mercadorias.some((m) => m.stock && m.stock.idstock === stockSelecionado));
+    return passaStock;
+  });
 
-    const wsVendas = XLSX.utils.json_to_sheet(
-      vendasFiltradas.map((v) => ({
-        ID: v.idvendas,
-        Quantidade: Array.isArray(v.itensVenda)
-          ? v.itensVenda.reduce((acc, it) => acc + Number(it.quantidade || 0), 0)
-          : Number(v.quantidade || 0),
-        Valor_Unitario: Number(v.valor_uni || 0),
-        Valor_Total: Number(v.valor_total || 0),
-        Status: v.status_p,
-        Data: v.data,
-        Mercadorias: Array.isArray(v.mercadorias) ? v.mercadorias.map((e) => e.nome).join(", ") : "",
-        Usuario: v.usuario == null ? "0" : v.usuario.login,
-      }))
-    );
+  const wsVendas = XLSX.utils.json_to_sheet(
+    vendasFiltradas.map((v) => ({
+      ID: v.idvendas,
+      Quantidade: Array.isArray(v.itensVenda)
+        ? v.itensVenda.reduce((acc, it) => acc + Number(it.quantidade || 0), 0)
+        : Number(v.quantidade || 0),
+      Valor_Unitario: Number(v.valor_uni || 0),
+      Valor_Total: Number(v.valor_total || 0),
+      Status: v.status_p,
+      Data: v.data,
+      Mercadorias: Array.isArray(v.mercadorias)
+        ? v.mercadorias.map((e) => e.nome).join(", ")
+        : "",
+      Usuario: v.usuario == null ? "0" : v.usuario.login,
+    }))
+  );
 
-    const totQtdVendida = vendasFiltradas.reduce(
-      (acc, v) =>
-        acc +
-        (Array.isArray(v.itensVenda)
-          ? v.itensVenda.reduce((acc2, it) => acc2 + Number(it.quantidade || 0), 0)
-          : Number(v.quantidade || 0)),
-      0
-    );
-    const totValorVendas = vendasFiltradas.reduce((acc, v) => acc + Number(v.valor_total || 0), 0);
-    const totValorDivida = vendasFiltradas
-      .filter((v) => v.status_p === "Em_Divida")
-      .reduce((acc, v) => acc + Number(v.valor_total || 0), 0);
+  const totQtdVendida = vendasFiltradas.reduce(
+    (acc, v) =>
+      acc +
+      (Array.isArray(v.itensVenda)
+        ? v.itensVenda.reduce((acc2, it) => acc2 + Number(it.quantidade || 0), 0)
+        : Number(v.quantidade || 0)),
+    0
+  );
+  const totValorVendas = vendasFiltradas.reduce(
+    (acc, v) => acc + Number(v.valor_total || 0),
+    0
+  );
+  const totValorDivida = vendasFiltradas
+    .filter((v) => v.status_p === "Em_Divida")
+    .reduce((acc, v) => acc + Number(v.valor_total || 0), 0);
 
-    XLSX.utils.sheet_add_json(
-      wsVendas,
-      [{ ID: "TOTAL", Quantidade: totQtdVendida, Valor_Total: Number(totValorVendas.toFixed(2)) }],
-      { skipHeader: true, origin: -1 }
-    );
-    XLSX.utils.sheet_add_json(
-      wsVendas,
-      [{ ID: "TOTAL_Divida", Valor_Total: Number(totValorDivida.toFixed(2)) }],
-      { skipHeader: true, origin: -1 }
-    );
+  XLSX.utils.sheet_add_json(
+    wsVendas,
+    [{ ID: "TOTAL", Quantidade: totQtdVendida, Valor_Total: Number(totValorVendas.toFixed(2)) }],
+    { skipHeader: true, origin: -1 }
+  );
+  XLSX.utils.sheet_add_json(
+    wsVendas,
+    [{ ID: "TOTAL_Divida", Valor_Total: Number(totValorDivida.toFixed(2)) }],
+    { skipHeader: true, origin: -1 }
+  );
 
-    // --- Resumo Financeiro (filtrado) ---
-    const resumo = calcularResumoFinanceiro(Dados2, Dados3, mesSelecionado, stockSelecionado);
-    const wsFinanceiro = XLSX.utils.json_to_sheet([
-      { Descricao: "Valor Total de Entradas", Valor: Number(resumo.valorEntradas.toFixed(2)) },
-      { Descricao: "Valor Total Disponível (Stock)", Valor: Number(resumo.valorDisponivel.toFixed(2)) },
-      { Descricao: "Valor Total de Vendas", Valor: Number(resumo.valorVendas.toFixed(2)) },
-      { Descricao: "Valor em Dívidas", Valor: Number(resumo.valorDividas.toFixed(2)) },
-      { Descricao: "Lucro Estimado (Vendas - Entradas)", Valor: Number(resumo.lucroEstimado.toFixed(2)) },
-      { Descricao: "Mês (filtro)", Valor: mesSelecionado || "Todos" },
-      { Descricao: "Stock (filtro)", Valor: stockSelecionado === 0 ? "Todos" : stockSelecionado },
-    ]);
+  // --- 4) Resumo Financeiro (já usas calcularResumoFinanceiro) ---
+  const resumo = calcularResumoFinanceiro(Dados2, Dados3, mesSelecionado, stockSelecionado);
+  const wsFinanceiro = XLSX.utils.json_to_sheet([
+    { Descricao: "Valor Total de Entradas", Valor: Number(resumo.valorEntradas.toFixed(2)) },
+    { Descricao: "Valor Total Disponível (Stock)", Valor: Number(resumo.valorDisponivel.toFixed(2)) },
+    { Descricao: "Valor Total de Vendas", Valor: Number(resumo.valorVendas.toFixed(2)) },
+    { Descricao: "Valor em Dívidas", Valor: Number(resumo.valorDividas.toFixed(2)) },
+    { Descricao: "Lucro Estimado (Vendas - Entradas)", Valor: Number(resumo.lucroEstimado.toFixed(2)) },
+    { Descricao: "Mês (filtro)", Valor: mesSelecionado || "Todos" },
+    { Descricao: "Stock (filtro)", Valor: stockSelecionado === 0 ? "Todos" : stockSelecionado },
+  ]);
 
-    // workbook
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsDados, "Resumo_Básico");
-    XLSX.utils.book_append_sheet(wb, wsVendas, "Vendas (filtrado)");
-    XLSX.utils.book_append_sheet(wb, wsEntradas, "Entradas (filtrado)");
-    XLSX.utils.book_append_sheet(wb, wsFinanceiro, "Resumo_Financeiro");
+  // --- montar workbook ---
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsDados, "Resumo_Básico");
+  XLSX.utils.book_append_sheet(wb, wsVendas, "Vendas (filtrado)");
+  XLSX.utils.book_append_sheet(wb, wsEntradas, "Entradas (filtrado)");
+  XLSX.utils.book_append_sheet(wb, wsFinanceiro, "Resumo_Financeiro");
 
-    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, "dashboard_dados.xlsx");
-  }
+  const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
+  saveAs(blob, nomeArquivo);
+}
+
 
   // RENDER
   return (
@@ -722,20 +753,21 @@ export default function Dashboard() {
             </div>
 
             <div>
-              <button
-                className="btn-export"
-                onClick={() => exportarParaExcel(dadosParaExportar, "dashboard_dados.xlsx")}
-              >
-                📥 Exportar Excel (com Resumo Financeiro)
-              </button>
+            <button
+  className="btn-export"
+  onClick={() => exportarParaExcel("dashboard_dados.xlsx")}
+>
+  📥 Exportar Excel (com Resumo Financeiro)
+</button>
+
             </div>
           </div>
 
           {/* KPI CARDS */}
           <div className="cards-grid">
             <KpiCard title="Total Clientes" value={formatNumber(cards[0] || 0)} icon={<Users />} color="#4fc3f7" />
-            <KpiCard title="Vendas Pagas (Qtd)" value={formatNumber(vendasPagasQtd)} icon={<TrendingUp />} color="#66bb6a" />
-            <KpiCard title="Vendas em Dívida (Qtd)" value={formatNumber(vendasDividaQtd)} icon={<TrendingDown />} color="#ef5350" />
+            <KpiCard title="Vendas Pagas" value={formatNumber(vendasPagasQtd) +" Mt"} icon={<TrendingUp />} color="#66bb6a" />
+            <KpiCard title="Vendas em Dívida (Qtd)" value={formatNumber(vendasDividaQtd) +" Mt"} icon={<TrendingDown />} color="#ef5350" />
             <KpiCard title="Total Mercadorias" value={formatNumber(totalMerc)} icon={<Box />} color="#ffa726" />
             <KpiCard title="Total Entradas (Qtd)" value={formatNumber(entrada)} icon={<List />} color="#42a5f5" />
             <KpiCard title="Total Saídas (Qtd)" value={formatNumber(saida)} icon={<DollarSign />} color="#7e57c2" />
@@ -930,7 +962,7 @@ function ResumoFinanceiro({ mercadorias = [], vendas = [], mesSelecionado, stock
 
     const valorEntradas = mercs.reduce((acc, m) => acc + Number(m.valor_total || 0), 0);
     const valorDisponivel = mercs.reduce(
-      (acc, m) => acc + Number(m.valor_un || 0) * Number(m.quantidade_est || 0),
+      (acc, m) => acc + Number(m.valor_un || 0) * Number(m.quantidade || 0),
       0
     );
     const valorVendas = vends.reduce((acc, v) => acc + Number(v.valor_total || 0), 0);
