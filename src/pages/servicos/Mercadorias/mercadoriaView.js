@@ -117,7 +117,18 @@ export default function MercadoriaView() {
 
   // Função para exportar os dados para Excel
   const exportToExcel = () => {
-    const dados = modelo.map((elemento) => ({
+    const dados = modelo.filter((elemento) => {
+      const nome = elemento.nome?.toLowerCase() || "";
+      const tipo = elemento.tipo?.toLowerCase() || "";
+      const pesquisa = termoPesquisa.trim();
+
+      return (
+        (!stockSelecionado ||
+          elemento.stock.idstock == stockSelecionado) &&
+        (nome.includes(pesquisa) || tipo.includes(pesquisa)) &&
+        passaFiltroData(elemento) // NOVO: aplica filtro de data
+      );
+    }).map((elemento) => ({
       ID: elemento.idmercadoria,
       Nome: elemento.nome,
       Tipo: elemento.tipo,

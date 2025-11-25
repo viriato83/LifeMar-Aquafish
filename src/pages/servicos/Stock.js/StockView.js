@@ -23,38 +23,9 @@ export default function StockView() {
   const [loading, setLoading] = useState(false); // Loading state
   let moda = new Modal();
   let msg = new mensagem();
-
-  useEffect(() => {
-    async function carregarDados() {
-      setLoading(true); // Activate loading
-      try {
-        const dadosModelo = await repositorio.leitura();
-        const dadosTotal = await repositorio.total();
-        setModelo(dadosModelo);
-        setTotal(dadosTotal);
-        const somaQuantidade = dadosModelo.reduce(
-          (soma, item) => soma + Number(item.quantidade || 0),
-          0
-        );
-
-        const somaQuantidadeEstoque = dadosModelo.reduce(
-          (soma, item) => soma + Number(item.quantidade_estoque || 0),
-          0
-        );
-        setTotalQuantidade(somaQuantidade);
-        setTotalEstoque(somaQuantidadeEstoque);
-      } catch (erro) {
-        console.error("Erro ao carregar dados:", erro);
-      } finally {
-        setLoading(false); // Deactivate loading
-      }
-    }
-    carregarDados();
-  }, []);
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [pesquisa, setPesquisa] = useState("");
-  // Filtrar por nome da mercadoria
   const listaFiltrada = modelo.filter((item) => {
     const passarFiltroTipo =
       pesquisa.trim() === ""
@@ -70,19 +41,97 @@ export default function StockView() {
   
     return passarFiltroTipo && passarFiltroData;
   });
-  
+  useEffect(() => {
+    const listaFiltrada = modelo.filter((item) => {
+  const passarFiltroTipo =
+    pesquisa.trim() === ""
+      ? true
+      : item.tipo.toLowerCase().includes(pesquisa.toLowerCase());
+
+  const dataItem = new Date(item.data);
+  const inicio = dataInicio ? new Date(dataInicio) : null;
+  const fim = dataFim ? new Date(dataFim) : null;
+
+  const passarFiltroData =
+    (!inicio || dataItem >= inicio) && (!fim || dataItem <= fim);
+
+  return passarFiltroTipo && passarFiltroData;
+});
+async function carregarDados() {
+  setLoading(true);
+  try {
+    const dadosModelo = await repositorio.leitura();
+
+    // // Cálculo dos totais
+    // const somaQuantidade = listaFiltrada.reduce(
+    //   (soma, item) => soma + Number(item.quantidade || 0),
+    //   0
+    // );
+
+    // const somaQuantidadeEstoque = listaFiltrada.reduce(
+    //   (soma, item) => soma + Number(item.quantidade_estoque || 0),
+    //   0
+    // );
+
+    setModelo(dadosModelo);
+    // setTotalQuantidade(somaQuantidade);
+    // setTotalEstoque(somaQuantidadeEstoque);
+  } catch (erro) {
+    console.error("Erro ao carregar dados:", erro);
+  } finally {
+    setLoading(false);
+  }
+}
+carregarDados();
+}, []);
+useEffect(() => {
+// recalcula a lista filtrada sempre que modelo/pesquisa/datas mudarem
+const lista = modelo.filter((item) => {
+  const passarFiltroTipo =
+    pesquisa.trim() === ""
+      ? true
+      : item.tipo.toLowerCase().includes(pesquisa.toLowerCase());
+
+  const dataItem = new Date(item.data);
+  const inicio = dataInicio ? new Date(dataInicio) : null;
+  const fim = dataFim ? new Date(dataFim) : null;
+
+  const passarFiltroData =
+    (!inicio || dataItem >= inicio) && (!fim || dataItem <= fim);
+
+  return passarFiltroTipo && passarFiltroData;
+});
+
+// se quiseres continuar a usar listaFiltrada no JSX,
+// podes guardar em estado também:
+// setListaFiltrada(lista);
+
+const somaQuantidade = lista.reduce(
+  (soma, item) => soma + Number(item.quantidade || 0),
+  0
+);
+
+const somaQuantidadeEstoque = lista.reduce(
+  (soma, item) => soma + Number(item.quantidade_estoque || 0),
+  0
+);
+
+setTotalQuantidade(somaQuantidade);
+setTotalEstoque(somaQuantidadeEstoque);
+}, [modelo, pesquisa, dataInicio, dataFim]);
+
 
   // Function to export data to Excel
   const exportToExcel = () => {
     // Create a worksheet from the data
     const ws = XLSX.utils.json_to_sheet(
-      modelo.map((item) => ({
+      listaFiltrada.map((item) => ({
         ID: item.idstock,
-        Quantidade: item.quantidade,
+        Quantidade_disp: item.quantidade.toFixed(2),
+        Quantidade: item.quantidade_estoque.toFixed(2),
         Tipo: item.tipo,
-        Data:item.data,
-        Mercadorias: item.mercadorias.map((merc) => `${merc.idmercadoria} : ${merc.nome}`).join(", "),
-        Total: item.total, // Assuming `item.total` exists in your data
+        Data: item.data,
+    
       }))
     );
     // Create a workbook with the worksheet

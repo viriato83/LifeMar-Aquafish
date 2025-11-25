@@ -48,10 +48,10 @@ export default function Slider() {
             </Link>
             <ul className={`submenu ${activeMenu === "clientes-menu" ? "show" : ""}`}>
               <li>
-                <Link to="/registarclientes">Registar Cliente</Link>
+                <Link to="/registarclientes">Registo de Cliente</Link>
               </li>
               <li>
-                <Link to="/clientesview">Ver Clientes Disponíveis</Link>
+                <Link to="/clientesview">Lista de Clientes</Link>
               </li>
             </ul>
           </li>
@@ -64,10 +64,10 @@ export default function Slider() {
                 </Link>
                 <ul className={`submenu ${activeMenu === "stock-menu" ? "show" : ""}`}>
                   <li>
-                    <Link to="/RegistarStock">Cadastrar Stock</Link>
+                    <Link to="/RegistarStock">Registo de Stock</Link>
                   </li>
                   <li>
-                    <Link to="/stockview">Ver Stocks Disponíveis</Link>
+                    <Link to="/stockview">Relatorio Stock</Link>
                   </li>
                 </ul>
               </li>
@@ -77,10 +77,10 @@ export default function Slider() {
                 </Link>
                 <ul className={`submenu ${activeMenu === "mercadorias-menu" ? "show" : ""}`}>
                   <li>
-                    <Link to="/registarmercadoria">Cadastrar Mercadoria</Link>
+                    <Link to="/registarmercadoria">Registo de Mercadoria</Link>
                   </li>
                   <li>
-                    <Link to="/mercadoriaview">Ver Mercadorias Disponíveis</Link>
+                    <Link to="/mercadoriaview">Relatorio Mercadorias</Link>
                   </li>
                 </ul>
               </li>
@@ -106,10 +106,10 @@ export default function Slider() {
             </Link>
             <ul className={`submenu ${activeMenu === "vendas-menu" ? "show" : ""}`}>
               <li>
-                <Link to="/registarvenda">Cadastrar Venda</Link>
+                <Link to="/registarvenda">Registo de Venda</Link>
               </li>
               <li>
-                <Link to="/vendasview">Ver Vendas Disponíveis</Link>
+                <Link to="/vendasview">Relatório Vendas</Link>
               </li>
             </ul>
           </li>
