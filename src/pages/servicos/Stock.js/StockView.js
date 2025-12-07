@@ -26,6 +26,7 @@ export default function StockView() {
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [pesquisa, setPesquisa] = useState("");
+  const [Desp,setDesp]= useState(false)
   const listaFiltrada = modelo.filter((item) => {
     const passarFiltroTipo =
       pesquisa.trim() === ""
@@ -39,7 +40,7 @@ export default function StockView() {
     const passarFiltroData =
       (!inicio || dataItem >= inicio) && (!fim || dataItem <= fim);
   
-    return passarFiltroTipo && passarFiltroData;
+    return passarFiltroTipo && passarFiltroData  && (( !Desp || item.quantidade>0));
   });
   useEffect(() => {
     const listaFiltrada = modelo.filter((item) => {
@@ -123,18 +124,42 @@ setTotalEstoque(somaQuantidadeEstoque);
 
   // Function to export data to Excel
   const exportToExcel = () => {
+    const dados =listaFiltrada.map((item) => ({
+      ID: item.idstock,
+      Quantidade_disp: item.quantidade.toFixed(2),
+      Quantidade: item.quantidade_estoque.toFixed(2),
+      Tipo: item.tipo,
+      Data: item.data,
+  
+    }))
     // Create a worksheet from the data
-    const ws = XLSX.utils.json_to_sheet(
-      listaFiltrada.map((item) => ({
-        ID: item.idstock,
-        Quantidade_disp: item.quantidade.toFixed(2),
-        Quantidade: item.quantidade_estoque.toFixed(2),
-        Tipo: item.tipo,
-        Data: item.data,
+  
+    dados.push(
+      {
+        ID: "",
+        Nome: "",
+        Tipo: "",
+        Quantidade: "",
+        "Quantidade Disponível": "",
+        "Data de Entrada": "",
     
-      }))
+      },
+      {
+        ID: "Resumo:",
+        Nome: "",
+        Tipo: "",
+        Quantidade: `${totalEstoque.toFixed(2)} Entradas`,
+        "Quantidade Disponível": `${totalQuantidade.toFixed(2)} em Stock`,
+        "Data de Entrada": "",
+        "Valor Unitário": "",
+       
+  
+      }
     );
     // Create a workbook with the worksheet
+    const ws = XLSX.utils.json_to_sheet( dados
+    
+    );
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Stock");
     
@@ -175,6 +200,7 @@ setTotalEstoque(somaQuantidadeEstoque);
   >
     Limpar Filtros
   </button>
+  
 </div>
  {/* CAMPO DE PESQUISA */}
  <input
@@ -184,6 +210,11 @@ setTotalEstoque(somaQuantidadeEstoque);
             onChange={(e) => setPesquisa(e.target.value)}
             className="pesquisa-input"
           />
+            <button className={`btn btn-outline-primary border   border-2 ${Desp==true?"bg-primary text-white ":""}` }
+          onClick={()=>{setDesp(!Desp)}}
+          >
+            Filtrar Disponivel
+          </button>
 
 
           <div className="tabela">
@@ -226,9 +257,9 @@ setTotalEstoque(somaQuantidadeEstoque);
               <tfoot>
               <tr>
                   <td colSpan="1">Total Quantidade Stock</td>
-                  <td>{totalEstoque.toFixed(2)}</td>
+                  <td>{totalEstoque.toFixed(2) } Itens</td>
                   <td colSpan="1">Total Quantidade Dispo</td>
-                  <td>{totalQuantidade.toFixed(2)}</td>
+                  <td>{totalQuantidade.toFixed(2)} Itens</td>
                   <td colSpan="2"></td>
                 </tr>
               </tfoot>

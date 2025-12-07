@@ -33,7 +33,7 @@ export default function MercadoriaView() {
   const repoStco = new repositorioStock();
   const [termoPesquisa, setTermoPesquisa] = useState("");
   const [valorDisponivel, setValorDisponivel] = useState(0);
-
+  const [Desp,setDesp]= useState(false)
   // NOVO: filtros de data
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
@@ -77,7 +77,7 @@ export default function MercadoriaView() {
 
         dadosModelo.forEach((e) => {
           if ((!stockSelecionado || stockSelecionado == e.stock.idstock)&&
-          passaFiltroData(e) ) {
+          passaFiltroData(e) && (( !Desp || e.quantidade>0)) ) {
             quantidadeEst += e.quantidade_est; // disponível
             quantidadeTotal += e.quantidade; // total entrada
             valorTotalEntradas += e.valor_total; // valor total entrada
@@ -99,8 +99,9 @@ export default function MercadoriaView() {
     }
 
     carregarDados();
-  },[stockSelecionado, dataInicio, dataFim]);
+  },[stockSelecionado, dataInicio, dataFim,Desp]);
 
+ 
   // NOVO: mapa de stocks que têm quantidade_est > 0
   const stocksComQuantidade = useMemo(() => {
     const mapa = {};
@@ -126,7 +127,7 @@ export default function MercadoriaView() {
         (!stockSelecionado ||
           elemento.stock.idstock == stockSelecionado) &&
         (nome.includes(pesquisa) || tipo.includes(pesquisa)) &&
-        passaFiltroData(elemento) // NOVO: aplica filtro de data
+        passaFiltroData(elemento) && (( !Desp || elemento.quantidade>0)) // NOVO: aplica filtro de data
       );
     }).map((elemento) => ({
       ID: elemento.idmercadoria,
@@ -242,6 +243,11 @@ export default function MercadoriaView() {
                 </option>
               ))}
           </select>
+          <button className={`btn btn-outline-primary border   border-2 ${Desp==true?"bg-primary text-white ":""}` }
+          onClick={()=>{setDesp(!Desp)}}
+          >
+            Filtrar Disponivel
+          </button>
 
           <div className="tabela">
             <table>
@@ -272,7 +278,7 @@ export default function MercadoriaView() {
                       (!stockSelecionado ||
                         elemento.stock.idstock == stockSelecionado) &&
                       (nome.includes(pesquisa) || tipo.includes(pesquisa)) &&
-                      passaFiltroData(elemento) // NOVO: aplica filtro de data
+                      passaFiltroData(elemento) && (( !Desp || elemento.quantidade>0))// NOVO: aplica filtro de data
                     );
                   })
                   .map((elemento, i) => {

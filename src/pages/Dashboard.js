@@ -150,7 +150,7 @@ export default function Dashboard() {
             entradasQtd += Number(m.quantidade_est || 0);
             // assumindo “saídas” = quantidade vendida daquela mercadoria (se tiveres campo próprio, ajusta aqui)
            
-            totalMercadorias += 1;
+            totalMercadorias += Number(m.quantidade || 0);
           }
         });
 
@@ -559,6 +559,9 @@ export default function Dashboard() {
     const lucroEstimado = valorVendas - valorEntradas;
     return { valorEntradas, valorDisponivel, valorVendas, valorDividas, lucroEstimado };
   }
+  const buscarCargo = () => {
+    return sessionStorage.getItem("cargo");
+  };
 
   // EXPORTAR EXCEL (4 abas, filtrado)
   // EXPORTAR EXCEL (4 abas, filtrado)
@@ -753,12 +756,14 @@ function exportarParaExcel(nomeArquivo = "dashboard_dados.xlsx") {
             </div>
 
             <div>
+            {(buscarCargo() !== "vendedor")? (
             <button
   className="btn-export"
   onClick={() => exportarParaExcel("dashboard_dados.xlsx")}
 >
   📥 Exportar Excel (com Resumo Financeiro)
 </button>
+            ):("")}
 
             </div>
           </div>
@@ -767,10 +772,15 @@ function exportarParaExcel(nomeArquivo = "dashboard_dados.xlsx") {
           <div className="cards-grid">
             <KpiCard title="Total Clientes" value={formatNumber(cards[0] || 0)} icon={<Users />} color="#4fc3f7" />
             <KpiCard title="Vendas Pagas" value={formatNumber(vendasPagasQtd) +" Mt"} icon={<TrendingUp />} color="#66bb6a" />
+            {(buscarCargo() !== "vendedor")? (
+              <>
             <KpiCard title="Vendas em Dívida (Qtd)" value={formatNumber(vendasDividaQtd) +" Mt"} icon={<TrendingDown />} color="#ef5350" />
-            <KpiCard title="Total Mercadorias" value={formatNumber(totalMerc)} icon={<Box />} color="#ffa726" />
+            <KpiCard title="Total Mercadorias Disponiveis" value={formatNumber(totalMerc)} icon={<Box />} color="#ffa726" />
             <KpiCard title="Total Entradas (Qtd)" value={formatNumber(entrada)} icon={<List />} color="#42a5f5" />
             <KpiCard title="Total Saídas (Qtd)" value={formatNumber(saida)} icon={<DollarSign />} color="#7e57c2" />
+            </>
+            ):("")}
+            
           </div>
 
           {/* CHARTS */}
@@ -785,12 +795,12 @@ function exportarParaExcel(nomeArquivo = "dashboard_dados.xlsx") {
               <canvas ref={mixedChartRef} />
             </div>
 
+              {(buscarCargo() !== "vendedor")? (
             <div className="small-cards">
               {/* <div className="chart-card small">
                 <h4>Distribuição por Stock</h4>
                 <canvas ref={pieChartRef} />
               </div> */}
-
               <div className="chart-card small">
                 <h4>Ranking Mercadorias</h4>
                 <ol className="ranking-list">
@@ -803,9 +813,11 @@ function exportarParaExcel(nomeArquivo = "dashboard_dados.xlsx") {
                 </ol>
               </div>
             </div>
+                 ):("")}
           </div>
-
           {/* TABELA RESUMO ENTRADAS */}
+          {(buscarCargo() !== "vendedor")? (
+            <>
           <div className="table-card">
             <h3>Resumo de Entradas (filtrado)</h3>
             <ResumoTabela
@@ -815,15 +827,18 @@ function exportarParaExcel(nomeArquivo = "dashboard_dados.xlsx") {
             />
           </div>
 
-          {/* RESUMO FINANCEIRO (DINHEIRO) */}
+
           <div className="table-card">
             <ResumoFinanceiro
               mercadorias={Dados2}
               vendas={Dados3}
               mesSelecionado={mesSelecionado}
               stockSelecionado={stockSelecionado}
-            />
+              />
           </div>
+          </>
+            ):("")}
+          
         </Content>
       </Conteinner>
       <Footer />
