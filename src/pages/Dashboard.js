@@ -759,7 +759,7 @@ function exportarParaExcel(nomeArquivo = "dashboard_dados.xlsx") {
             {(buscarCargo() !== "vendedor")? (
             <button
   className="btn-export"
-  onClick={() => exportarParaExcel("dashboard_dados.xlsx")}
+  onClick={() => exportarParaExcel("dashboard_Relatorio.xlsx")}
 >
   📥 Exportar Excel (com Resumo Financeiro)
 </button>
