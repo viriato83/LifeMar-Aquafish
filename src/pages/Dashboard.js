@@ -806,7 +806,7 @@ function exportarParaExcel(nomeArquivo = "dashboard_dados.xlsx") {
                 <ol className="ranking-list">
                   {ranking.map((r, idx) => (
                     <li key={r.nome}>
-                      <strong>{idx + 1}.</strong> {r.nome} — <em>{formatNumber(r.qtd)} kg</em>
+                      <strong>{idx + 1}.</strong> {r.nome} — <em>{formatNumber(r.qtd)} Itens</em>
                     </li>
                   ))}
                   {ranking.length === 0 && <li>Nenhuma venda registada</li>}
