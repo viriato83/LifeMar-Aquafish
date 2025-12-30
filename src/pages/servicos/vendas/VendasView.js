@@ -137,7 +137,7 @@ const confirmarPagamento = async () => {
 
     carregarDados();
   }, [stockSelecionado,mesSelecionado]);
-
+console.log(modelo)
   const exportarParaExcel = () => {
     const dados = [];
   

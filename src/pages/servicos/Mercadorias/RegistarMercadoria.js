@@ -15,6 +15,7 @@ import Loading from "../../../components/loading";
 import { Link } from "lucide-react";
 import { HiArrowSmRight } from "react-icons/hi";
 
+import Select from "react-select";
 
 export default function RegistarMercadoria() {
   const [inputs, setInputs] = useState({
@@ -117,7 +118,11 @@ export default function RegistarMercadoria() {
        }
     }
   };
-  
+  const stockOptions = estoques.filter((e)=>e.quantidade>0).map((estoque) => ({
+    value: estoque.idstock,
+    label: `${estoque.idstock}. ${estoque.tipo} :: ${estoque.quantidade}`,
+  }));
+   
   
 
   return (
@@ -201,21 +206,19 @@ export default function RegistarMercadoria() {
               /> */}
               <br />
               <label>Stock:</label>
-              <select
-                className="estoque"
-                onChange={(e) =>
-                  setInputs({ ...inputs, estoque: e.target.value })
-                }
-              >
-                <option value="">Selecione um Stock
-                
-                </option>
-                {estoques.map((estoque) => (
-                  <option key={estoque.idstock} value={estoque.idstock} >
-                   {estoque.idstock}. {estoque.tipo} :: {estoque.quantidade}
-                  </option>
-                ))}
-              </select>
+              <Select
+  className="estoque"
+  classNamePrefix="react-select"
+  placeholder="Selecione um Stock"
+  options={stockOptions}
+  value={stockOptions.find(
+    (option) => option.value == inputs.estoque
+  )}
+  onChange={(selectedOption) =>
+    setInputs({ ...inputs, estoque: selectedOption.value })
+  }
+/>
+
             </div>
             <button onClick={cadastrar} className="cadastrarMercadoria">
               Cadastrar

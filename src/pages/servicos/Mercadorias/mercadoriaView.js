@@ -301,7 +301,7 @@ export default function MercadoriaView() {
                         {/* <td>{elemento.q_saidas}</td> */}
                         <td>{elemento.data_saida}</td>
                         <td>
-                          {elemento.stock.idstock} : {elemento.stock.tipo}
+                          {elemento.stock.idstock} : {elemento.stock.tipo};
                         </td>
                         {permissao === "admin" && (
                           <td>

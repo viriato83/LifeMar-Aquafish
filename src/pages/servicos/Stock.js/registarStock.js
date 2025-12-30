@@ -51,12 +51,12 @@ export default function RegistarStock() {
   };
 
   const cadastrar = () => {
-    if (!validarCampos()) return;
-
+    
     if (id) {
       repositorio.editar(id, criaStock());
       msg.sucesso("Stock editado com sucesso.");
     } else {
+      if (!validarCampos()) return;
       console.log(criaStock())
       repositorio.cadastrar(criaStock());
       msg.sucesso("Stock cadastrado com sucesso.");
