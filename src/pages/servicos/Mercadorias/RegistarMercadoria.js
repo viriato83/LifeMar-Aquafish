@@ -99,7 +99,7 @@ export default function RegistarMercadoria() {
           } else {
                 if(calculaQuantidadeStock()>=0){
                   await repositorio.cadastrar(criaMercadoria());
-                  await  estoqueRepo.editar(inputs.estoque,new stock(0,calculaQuantidadeStock(),"","","",0))
+                  await  estoqueRepo.editar(inputs.estoque,new stock(calculaQuantidadeStock(),'',"","","",0))
                   localStorage.setItem("quantidade",JSON.stringify(quantidade))
                   msg.sucesso("Mercadoria cadastrada com sucesso.");
                   limparFormulario(); // Limpa o formulário após cadastrar
