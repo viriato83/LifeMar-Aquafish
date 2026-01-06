@@ -340,6 +340,14 @@ const cadastrar = async () => {
   try {
     setLoading(true)
     if (inputs.cliente!== status) {
+      const quantidadeValida = novaMercadoria.every(
+        e => Number(e.novaQuantidade) >= 0
+      );
+    
+      if (!quantidadeValida) {
+        msg.Erro("Quantidade inválida");
+        return;
+      }
       await repositorio.cadastrar(criaVenda());
    
       // Atualizar mercadorias - espera arrays para mercadorias e quantidades
