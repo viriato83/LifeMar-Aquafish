@@ -525,7 +525,7 @@ async function imprimirFatura(id, cliente, data, mercadoria, quantidade, status_
                     </tfoot>
                   
             </table>
-            {(permissao === "admin" || permissao === "gerente") && (
+            {(permissao === "admin" ) && (
               <div className="crud">
                 <button className="editar" onClick={() => {
                   if (id) {

@@ -335,7 +335,7 @@ export default function MercadoriaView() {
               </tfoot>
             </table>
 
-            {(permissao === "admin" || permissao === "gerente") && (
+            {(permissao === "admin" ) && (
               <div className="crud">
                 <button
                   className="editar"
