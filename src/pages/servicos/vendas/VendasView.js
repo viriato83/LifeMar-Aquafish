@@ -19,6 +19,7 @@ import Item from "./VendaItem/Item";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { FaSearch } from "react-icons/fa";
 
 export default function VendasView() {
   const repositorio = new repositorioVenda();
@@ -38,7 +39,7 @@ export default function VendasView() {
   const [mesSelecionado, setMesSelecionado] = useState("");
   const Itemrepositorio= new ItemRepository();
   const[Item,setItem]=useState([])
-
+  const [termoPesquisa, setTermoPesquisa] = useState("");
   const [totalDivida, setTotalDivida] = useState(0);
   const [quantiDivida,setQuantiDivida] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
@@ -403,6 +404,20 @@ async function imprimirFatura(id, cliente, data, mercadoria, quantidade, status_
         </Link>
 
         {/* {Filtro} */}
+        
+          {/* Pesquisa */}
+          <label>
+            {" "}
+            <FaSearch />
+            Pesquisar:
+          </label>
+          <input
+            type="search"
+            className="pesquisa"
+            placeholder="Pesquisar por nome "
+            onChange={(e) => setTermoPesquisa(e.target.value.toLowerCase())}
+          />
+
         <label>    Filtrar por Stock:</label>
          <img src=""></img>
           <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)}>
@@ -445,11 +460,17 @@ async function imprimirFatura(id, cliente, data, mercadoria, quantidade, status_
               </thead>
               <tbody>
               {modelo.filter((elemento) =>{
+                 const nome = elemento.mercadorias.map((mercadoria) =>mercadoria.nome?.toLowerCase() || "");
+                 const tipo = elemento.cliente.nome?.toLowerCase() || "";
                   const dataVenda = new Date(elemento.data);
                   const anoMes = `${dataVenda.getFullYear()}-${String(dataVenda.getMonth() + 1).padStart(2, '0')}`;
-                  
-              
-                return  ( !mesSelecionado || anoMes === mesSelecionado) &&(!stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado))
+                  const pesquisa = termoPesquisa.trim();
+                  const pesquisaLower = pesquisa.toLowerCase();
+                  const nomeMatch = elemento.mercadorias.some(
+                    (mercadoria) =>
+                      mercadoria.nome?.toLowerCase().includes(pesquisaLower)
+                  );
+                return  ( !mesSelecionado || anoMes === mesSelecionado) && (nomeMatch || tipo.includes(pesquisaLower)) &&(!stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado))
                 })
                 .map((elemento, i) => {
                    let estado=""
