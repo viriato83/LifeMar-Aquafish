@@ -1,120 +1,164 @@
 import React, { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { FiMenu, FiX } from "react-icons/fi"; // Ícones de menu
-import { MdDashboard } from "react-icons/md";
+import { NavLink } from "react-router-dom";
+import { FiMenu, FiX } from "react-icons/fi";
+import { MdDashboard, MdPeople, MdInventory, MdLocalMall, MdAttachMoney } from "react-icons/md";
 
 export default function Slider() {
-  const [activeMenu, setActiveMenu] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [active,setActive] = useState(false)
-  const [active1,setActive1] = useState(false)
-  const [active2,setActive2] = useState(false)
-  const [active3,setActive3] = useState(false)
-  const [active4,setActive4] = useState(false)
-
-  const toggleMenu = (menu) => {
-    setActiveMenu((prevMenu) => (prevMenu === menu ? null : menu));
-  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const buscarCargo = () => {
-    return sessionStorage.getItem("cargo");
-  };
+  const buscarCargo = () => sessionStorage.getItem("cargo");
 
   return (
     <>
-  
-        <button
-          className={`hamburger-menu ${sidebarOpen ? "open" : ""}`}
-          onClick={toggleSidebar}
-        >
-          {sidebarOpen ? <FiX /> : <FiMenu />}
-        </button>
-   
+      {/* Botão Hamburger */}
+      <button
+        className={`hamburger-menu ${sidebarOpen ? "open" : ""}`}
+        onClick={toggleSidebar}
+      >
+        {sidebarOpen ? <FiX /> : <FiMenu />}
+      </button>
 
+      {/* Sidebar */}
       <nav className={`sidebar ${sidebarOpen ? "active" : ""}`}>
         <ul>
+          {/* === Seção Dashboard === */}
+          <li className="section-title">
+            <MdDashboard /> Dashboard
+          </li>
           <li>
-          <NavLink to="/" className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}>
-              <MdDashboard /> Dashboard
+            <NavLink
+              to="/"
+              className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}
+            >
+              Painel Principal
+            </NavLink>
+          </li>
+
+          {/* === Seção Clientes === */}
+          <li className="section-title">
+            <MdPeople /> Clientes
+          </li>
+          <li>
+            <NavLink
+              to="/registarclientes"
+              className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""} `}
+            >
+              Registar Cliente
             </NavLink>
           </li>
           <li>
-            <Link onClick={() =>{ toggleMenu("clientes-menu"); setActive(!active)}} className=  {` dropdown-toggle toggle-menu bg-${active? "primary":""}`}>
-              Clientes
-            </Link>
-            <ul className={`submenu ${activeMenu === "clientes-menu" ? "show" : ""}`}>
-              <li>
-                <Link to="/registarclientes">Registo de Cliente</Link>
-              </li>
-              <li>
-                <Link to="/clientesview">Lista de Clientes</Link>
-              </li>
-            </ul>
+            <NavLink
+              to="/clientesview"
+              className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}
+            >
+              Lista de Clientes
+            </NavLink>
           </li>
 
-          {(buscarCargo() !== "vendedor")? (
+          {/* === Seção Stock e Mercadorias (somente se não for vendedor) === */}
+          {buscarCargo() !== "vendedor" && (
             <>
-              <li>
-                <Link onClick={() =>{ toggleMenu("stock-menu");setActive1(!active1)}} className=  {` dropdown-toggle toggle-menu bg-${active1? "primary":""}`}>
-                  Stock
-                </Link>
-                <ul className={`submenu ${activeMenu === "stock-menu" ? "show" : ""}`}>
-                  <li>
-                    <Link to="/RegistarStock">Registo de Stock</Link>
-                  </li>
-                  <li>
-                    <Link to="/stockview">Relatorio Stock</Link>
-                  </li>
-                </ul>
+              {/* Stock */}
+              <li className="section-title">
+                <MdInventory /> Stock
               </li>
               <li>
-                <Link onClick={() =>{toggleMenu("mercadorias-menu"); setActive2(!active2)}} className=  {` dropdown-toggle toggle-menu bg-${active2? "primary":""}`}>
-                  Mercadorias
-                </Link>
-                <ul className={`submenu ${activeMenu === "mercadorias-menu" ? "show" : ""}`}>
-                  <li>
-                    <Link to="/registarmercadoria">Registo de Mercadoria</Link>
-                  </li>
-                  <li>
-                    <Link to="/mercadoriaview">Relatorio Mercadorias</Link>
-                  </li>
-                </ul>
+                <NavLink
+                  to="/RegistarStock"
+                  className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}
+                >
+                  Registar Stock
+                </NavLink>
               </li>
-              {/* <li>
-                <Link onClick={() =>{ toggleMenu("mortalidade-menu"); setActive3(!active3)}} className=  {` dropdown-toggle toggle-menu bg-${active3? "primary":""}`}>
-                Mortalidade
-                </Link>
-                <ul className={`submenu ${activeMenu === "mortalidade-menu" ? "show" : ""}`}>
-                  <li>
-                    <Link to="/Registarmortalidade">Cadastrar Mortalidades</Link>
-                  </li>
-                  <li>
-                    <Link to="/mortalidadeview">Ver Mortalidades Disponíveis</Link>
-                  </li>
-                </ul>
-              </li> */}
+              <li>
+                <NavLink
+                  to="/stockview"
+                  className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}
+                >
+                  Relatório Stock
+                </NavLink>
+              </li>
+
+              {/* Mercadorias */}
+              <li className="section-title">
+                <MdLocalMall /> Mercadorias
+              </li>
+              <li>
+                <NavLink
+                  to="/registarmercadoria"
+                  className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}
+                >
+                  Registar Mercadoria
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/mercadoriaview"
+                  className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}
+                >
+                  Relatório Mercadorias
+                </NavLink>
+              </li>
             </>
-          ) : null}
-   
+          )}
+
+          {/* === Seção Vendas === */}
+          <li className="section-title">
+            <MdAttachMoney /> Vendas
+          </li>
           <li>
-            <Link onClick={() =>{ toggleMenu("vendas-menu"); setActive4(!active4)}} className=  {` dropdown-toggle toggle-menu bg-${active4? "primary":""}`}>
-              Vendas
-            </Link>
-            <ul className={`submenu ${activeMenu === "vendas-menu" ? "show" : ""}`}>
-              <li>
-                <Link to="/registarvenda">Registo de Venda</Link>
-              </li>
-              <li>
-                <Link to="/vendasview">Relatório Vendas</Link>
-              </li>
-            </ul>
+            <NavLink
+              to="/registarvenda"
+              className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}
+            >
+              Registar Venda
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/vendasview"
+              className={({ isActive }) => `toggle-menu ${isActive ? "active1" : ""}`}
+            >
+              Relatório Vendas
+            </NavLink>
           </li>
         </ul>
       </nav>
+
+      {/* ===== Estilos simples para títulos de seção ===== */}
+      <style jsx>{`
+        .section-title {
+          font-weight: bold;
+          font-size: 0.9rem;
+          padding: 10px 20px;
+          margin-top: 15px;
+          color: #999;
+          text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .toggle-menu {
+          display: block;
+          padding: 10px 20px;
+          color: #fff;
+          text-decoration: none;
+          transition: background 0.3s;
+        }
+
+        .toggle-menu.active1 {
+          background-color: #007bff; /* cor de destaque */
+        }
+
+        .toggle-menu:hover {
+          background-color: #0056b3;
+        }
+      `}</style>
     </>
   );
 }

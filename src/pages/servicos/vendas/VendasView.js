@@ -43,6 +43,7 @@ export default function VendasView() {
   const [totalDivida, setTotalDivida] = useState(0);
   const [quantiDivida,setQuantiDivida] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
+  const [Divida,SetDivida]= useState(true)
 const [mensagem, setMensagem] = useState("");
 const [clienteParaPagar, setClienteParaPagar] = useState(null);
 const[Data,setData]=useState("")
@@ -65,79 +66,69 @@ const confirmarPagamento = async () => {
   }
 };
 
- 
-  useEffect(() => {
-    msg.current = new Mensagem();
-    moda.current = new Modal();
-    
-    async function carregarDados() {
-      setLoading(true);
-      try {
-        const dadosModelo = await repositorio.leitura();
-        const repositoriomerc = await repositorioMerc.leitura();
-        const repoStck = await repoStco.leitura();
-        const item= await Itemrepositorio.leitura();
-        const dadosTotal = await repositorio.total();
-        const quantidadeTotalVendas = dadosModelo.reduce((acc, venda) => acc + venda.valor_total, 0);
-        var valorTotalVendas = 0
-        var quantidadeTotal = 0;
-        var quantidadeTotal2 = 0;
-        var quantidadeDivida= 0;
-         
+ useEffect(() => {
+  async function carregarDados() {
+    setLoading(true);
+    try {
+      const dadosModelo = await repositorio.leitura();
+      const repoStck = await repoStco.leitura();
+      const item = await Itemrepositorio.leitura();
 
-        dadosModelo.forEach((e) => {
-          
-          const dataMercadoria = new Date(e.data);
-          const anoMes = `${dataMercadoria.getFullYear()}-${String(dataMercadoria.getMonth() + 1).padStart(2, '0')}`;
-          
-         
-              e.mercadorias.forEach((o) => {
-            
-            
-            
-                if ( (!mesSelecionado || anoMes === mesSelecionado)&&(!stockSelecionado|| (stockSelecionado && stockSelecionado == o.stock.idstock))) {
-                    setData(anoMes)
-                      if (e.status_p == "Em_Divida") {
-                        e.itensVenda.forEach((item) => {
-                          quantidadeTotal2 += item.quantidade;
-                          quantidadeDivida += e.valor_total;
-                        })
-                      }else{
-                        e.itensVenda.forEach((item) => {
-                            quantidadeTotal +=item.quantidade;
-                    
-                            valorTotalVendas += e.valor_total;
-                        })
-                    
-                      }
-              
-                  } 
-                
-              });
-            });
-        setModelo2(repoStck)
-        setItem(item)
-        setQuantiDivida(quantidadeDivida);
-        setModelo(dadosModelo);
-        setTotal(quantidadeTotal);
-        setTotalDivida(quantidadeTotal2);
-        setQuantidadeTotal(valorTotalVendas);
-        localStorage.setItem('quantidadeVendas', quantidadeTotal.toString());
-        localStorage.setItem('valorTotalVendas', JSON.stringify(valorTotalVendas));
-        localStorage.setItem('quantidadeVendasD', quantidadeTotal2.toString());
-        localStorage.setItem('valorTotalVendasD', JSON.stringify(quantidadeDivida));
-      
-      } catch (erro) {
-        console.error("Erro ao carregar dados:", erro);
-        msg.current.Erro("Erro ao carregar dados.");
-      } finally {
-        setLoading(false);
-      }
+      let totalPago = 0;
+      let quantidadePago = 0;
+      let totalDividaValor = 0;
+      let quantidadeDividaValor = 0;
+
+      dadosModelo.forEach((venda) => {
+        const dataVenda = new Date(venda.data);
+        const anoMes = `${dataVenda.getFullYear()}-${String(
+          dataVenda.getMonth() + 1
+        ).padStart(2, "0")}`;
+
+        // Filtro por mês e stock
+        const mesValido = !mesSelecionado || anoMes === mesSelecionado;
+        const stockValido =
+          !stockSelecionado ||
+          venda.mercadorias.some((m) => m.stock.idstock == stockSelecionado);
+
+        // Filtro por dívida
+        const dividaValido =
+          Divida || venda.status_p === "Em_Divida";
+
+        if (mesValido && stockValido && dividaValido) {
+          if (venda.status_p === "Em_Divida") {
+            quantidadeDividaValor += venda.itensVenda.reduce(
+              (acc, item) => acc + item.quantidade,
+              0
+            );
+            totalDividaValor += venda.valor_total;
+          } else {
+            quantidadePago += venda.itensVenda.reduce(
+              (acc, item) => acc + item.quantidade,
+              0
+            );
+            totalPago += venda.valor_total;
+          }
+        }
+      });
+
+      setModelo(dadosModelo);
+      setModelo2(repoStck);
+      setItem(item);
+      setTotal(quantidadePago);
+      setQuantidadeTotal(totalPago);
+      setTotalDivida(quantidadeDividaValor);
+      setQuantiDivida(totalDividaValor);
+    } catch (erro) {
+      console.error("Erro ao carregar dados:", erro);
+    } finally {
+      setLoading(false);
     }
-   
+  }
 
-    carregarDados();
-  }, [stockSelecionado,mesSelecionado]);
+  carregarDados();
+}, [stockSelecionado, mesSelecionado, Divida]);
+
 console.log(modelo)
   const exportarParaExcel = () => {
     const dados = [];
@@ -404,9 +395,7 @@ async function imprimirFatura(id, cliente, data, mercadoria, quantidade, status_
         </Link>
 
         {/* {Filtro} */}
-        
-          {/* Pesquisa */}
-          <label>
+          <div><label>
             {" "}
             <FaSearch />
             Pesquisar:
@@ -416,26 +405,33 @@ async function imprimirFatura(id, cliente, data, mercadoria, quantidade, status_
             className="pesquisa"
             placeholder="Pesquisar por nome "
             onChange={(e) => setTermoPesquisa(e.target.value.toLowerCase())}
-          />
+          /></div>
+        <div class="filtros d-flex justify-content-center align-items-center align-content-between"> {/* Pesquisa */}
 
-        <label>    Filtrar por Stock:</label>
-         <img src=""></img>
-          <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)}>
+       <div> <label>    Filtrar por Stock:</label>
+ 
+          <select value={stockSelecionado} onChange={(e) => setLoteS(e.target.value)} className="w-75">
           <option>Selecione Um Stock</option>
             {modelo2.map((stock) => (
               <option key={stock.idstock} value={stock.idstock}>
                 Stock {stock.tipo}
               </option>
             ))}
-          </select>
-          <label>Filtrar por Mês:</label>
+          </select></div>
+          <div>  <label>Filtrar por Mês:</label>
         <input
           type="month"
           value={mesSelecionado}
           onChange={(e) => setMesSelecionado(e.target.value)}
           style={{ marginBottom: "1rem", display: "block" }}
-        />
-<button onClick={gerarPDF} className="btn btn-success" style={{ marginBottom: "1rem" }}>
+        /></div>
+        <div>
+          <label className="w-25"></label>
+           <button onClick={()=>{SetDivida(!Divida)}} className={`btn mx-5 ${Divida?"bg-ligth":"bg-primary"}`}>Filtrar por Dividas </button>
+        </div>
+        </div>
+         
+<button onClick={gerarPDF} className=" btn btn-success" style={{ marginBottom: "1rem" }}>
   Imprimir Facturas (PDF)
 </button>
 
@@ -470,7 +466,7 @@ async function imprimirFatura(id, cliente, data, mercadoria, quantidade, status_
                     (mercadoria) =>
                       mercadoria.nome?.toLowerCase().includes(pesquisaLower)
                   );
-                return  ( !mesSelecionado || anoMes === mesSelecionado) && (nomeMatch || tipo.includes(pesquisaLower)) &&(!stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado))
+                return  ( !mesSelecionado || anoMes === mesSelecionado) && (nomeMatch || tipo.includes(pesquisaLower)) &&(!stockSelecionado || elemento.mercadorias.some((e) => e.stock.idstock == stockSelecionado)) && (Divida==true || elemento.status_p=="Em_Divida")
                 })
                 .map((elemento, i) => {
                    let estado=""

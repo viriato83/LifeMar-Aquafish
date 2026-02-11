@@ -98,6 +98,7 @@ header:hover {
 }
 
 .sidebar ul li a {
+  border-bottom:1px solid #1371b4;
   color: #fff;
   text-decoration: none;
   font-size: 18px;
@@ -215,7 +216,7 @@ footer {
   align-items: center;
   border-radius: 10px;
   background-color: rgba(0, 128, 128, 0.05);
-  width: 350px;
+  width: auto;
   height: auto;
   padding: 30px;
   box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.1);
@@ -224,11 +225,12 @@ footer {
 .Cadastro input {
   width: 100%;
   margin-bottom: 15px;
-  padding: 10px;
+  padding: 10px ;
   border-radius: 8px;
   border: 1px solid #ccc;
   transition: border-color 0.3s;
   outline-style: none;
+  text-align: start;
 }
 
 .Cadastro input:focus {
